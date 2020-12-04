@@ -1,13 +1,39 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"time"
 
 	"github.com/go-rod/rod"
 )
 
+// Based off: https://programming.guide/go/define-enumeration-string.html
+type stockCheckResult int
+
+const (
+	InStock stockCheckResult = iota
+	OutOfStock
+	ErrorOccurred
+)
+
+func (s stockCheckResult) String() string {
+	return [...]string{
+		"In stock",
+		"Out of stock",
+		"Error occurred"}[s]
+}
+
 func main() {
+	r := checkArgos()
+
+	results := map[string]stockCheckResult{
+		"Argos": r,
+	}
+
+	notify(results)
+}
+
+func checkArgos() stockCheckResult {
 	// TODO .rod config is for dev only
 	// Argos
 
@@ -31,20 +57,30 @@ func main() {
 	_, err := productCardTextContainerElement.Element(`img[alt="out of stock"]`)
 
 	if err == nil {
-		log.Println("Out of stock")
-
-		// TODO return result with out of stock
+		return OutOfStock
 	} else if err.Error() == "cannot find element" {
-		log.Println("Have stock")
-
-		// TODO maybe remove this
-		page.MustWaitLoad().MustScreenshot("tmp/argos.png")
-
-		// TODO notify things since have stock
+		return InStock
 	} else {
-		// TODO return err
+		log.Println(err)
+
+		return ErrorOccurred
+	}
+}
+
+func notify(results map[string]stockCheckResult) {
+	// TODO should be config DO NOT COMMIT
+	// accountSid := ""
+	// authToken := ""
+	// numberTo := ""
+	// numberFrom := ""
+
+	body := "Stock checker results:\n"
+
+	for k, v := range results {
+		body = fmt.Sprintf(body+"&v: %v\n", k, v.String())
 	}
 
-	// TODO This is for dev only
-	time.Sleep(time.Hour)
+	// TODO Follow https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
+
+	log.Println(body)
 }
