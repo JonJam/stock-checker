@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/go-rod/rod"
 )
@@ -30,7 +34,11 @@ func main() {
 		"Argos": r,
 	}
 
-	notify(results)
+	err := notify(results)
+
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func checkArgos() stockCheckResult {
@@ -67,20 +75,52 @@ func checkArgos() stockCheckResult {
 	}
 }
 
-func notify(results map[string]stockCheckResult) {
+// Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
+func notify(results map[string]stockCheckResult) error {
 	// TODO should be config DO NOT COMMIT
-	// accountSid := ""
-	// authToken := ""
-	// numberTo := ""
-	// numberFrom := ""
+	accountSid := ""
+	authToken := ""
+	numberTo := ""
+	numberFrom := ""
+	requestURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", accountSid)
 
 	body := "Stock checker results:\n"
 
 	for k, v := range results {
-		body = fmt.Sprintf(body+"&v: %v\n", k, v.String())
+		body = fmt.Sprintf(body+"%s: %s\n", k, v.String())
 	}
 
-	// TODO Follow https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
+	msgData := url.Values{}
+	msgData.Set("To", numberTo)
+	msgData.Set("From", numberFrom)
+	msgData.Set("Body", body)
+	msgDataReader := *strings.NewReader(msgData.Encode())
 
-	log.Println(body)
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", requestURL, &msgDataReader)
+
+	if err != nil {
+		return err
+	}
+
+	req.SetBasicAuth(accountSid, authToken)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
+		return fmt.Errorf("unexpected status code from Twilio: %v", resp.StatusCode)
+	}
+
+	// Success HTTP Status but need to check response for error
+	var data map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&data)
+
+	return err
 }
