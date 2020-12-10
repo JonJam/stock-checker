@@ -28,27 +28,26 @@ func (s stockCheckResult) String() string {
 }
 
 func main() {
-	r := checkArgos()
+	// TODO .rod config is for dev only
 
 	results := map[string]stockCheckResult{
-		"Argos": r,
+		// "Argos": checkArgos(),
+		"Game": checkGame(),
 	}
 
-	err := notify(results)
+	log.Println(results)
 
-	if err != nil {
-		log.Println(err)
-	}
+	// TODO Disabled while testing
+	// err := notify(results)
+
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 }
 
 func checkArgos() stockCheckResult {
-	// TODO .rod config is for dev only
-	// Argos
-
-	// Home (https://www.argos.co.uk/)
+	// Home
 	page := rod.New().MustConnect().MustPage("https://www.argos.co.uk/")
-
-	page.MustWaitLoad().MustScreenshot("temp/a.png")
 
 	// Cookie banner
 	page.MustElement("#consent_prompt_submit").MustClick()
@@ -58,11 +57,32 @@ func checkArgos() stockCheckResult {
 	page.MustElement(`button[data-test="search-button"]`).MustClick()
 
 	// Search page (https://www.argos.co.uk/search/)
-	productLinkElement := page.MustElementR("a", "Xbox Series X 1TB Console")
+	page.MustElementR("a", "Xbox Series X 1TB Console").MustClick()
 
-	productCardTextContainerElement := productLinkElement.MustParent()
+	// Out of stock page (https://www.argos.co.uk/vp/oos/xbox.html)
+	_, err := page.ElementR("h1", "Sorry, Xbox is currently unavailable.")
 
-	_, err := productCardTextContainerElement.Element(`img[alt="out of stock"]`)
+	if err == nil {
+		return OutOfStock
+	} else if err.Error() == "cannot find element" {
+		return InStock
+	} else {
+		log.Println(err)
+
+		return ErrorOccurred
+	}
+}
+
+func checkGame() stockCheckResult {
+	// Xbox Series X page
+	page := rod.New().MustConnect().MustPage("https://www.game.co.uk/xbox-series-x")
+
+	consolesSection := page.MustElement("#contentPanelsConsoles")
+
+	consoleTitleElement := consolesSection.MustElementR("h3", "Series X")
+	panelItemElement := consoleTitleElement.MustParent()
+
+	_, err := panelItemElement.ElementR("a", "Out of sock")
 
 	if err == nil {
 		return OutOfStock
