@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
 )
 
@@ -32,7 +33,8 @@ func main() {
 
 	results := map[string]stockCheckResult{
 		// "Argos": checkArgos(),
-		"Game": checkGame(),
+		// "Game": checkGame(),
+		"John Lewis": checkJohnLewis(),
 	}
 
 	log.Println(results)
@@ -46,8 +48,13 @@ func main() {
 }
 
 func checkArgos() stockCheckResult {
-	// Home
-	page := rod.New().MustConnect().MustPage("https://www.argos.co.uk/")
+	browser := rod.New().MustConnect()
+	defer browser.Close()
+
+	page := bypass.MustPage(browser)
+
+	// Home (https://www.argos.co.uk/)
+	page.MustNavigate("https://www.argos.co.uk/")
 
 	// Cookie banner
 	page.MustElement("#consent_prompt_submit").MustClick()
@@ -74,8 +81,13 @@ func checkArgos() stockCheckResult {
 }
 
 func checkGame() stockCheckResult {
-	// Xbox Series X page
-	page := rod.New().MustConnect().MustPage("https://www.game.co.uk/xbox-series-x")
+	browser := rod.New().MustConnect()
+	defer browser.Close()
+
+	page := bypass.MustPage(browser)
+
+	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
+	page.MustNavigate("https://www.game.co.uk/xbox-series-x")
 
 	consolesSection := page.MustElement("#contentPanelsConsoles")
 
@@ -83,6 +95,46 @@ func checkGame() stockCheckResult {
 	panelItemElement := consoleTitleElement.MustParent()
 
 	_, err := panelItemElement.ElementR("a", "Out of sock")
+
+	if err == nil {
+		return OutOfStock
+	} else if err.Error() == "cannot find element" {
+		return InStock
+	} else {
+		log.Println(err)
+
+		return ErrorOccurred
+	}
+}
+
+func checkJohnLewis() stockCheckResult {
+	browser := rod.New().MustConnect()
+	defer browser.Close()
+
+	page := bypass.MustPage(browser)
+
+	// Home page
+	page.MustNavigate("https://www.johnlewis.com/")
+
+	// Cookie banner
+	page.MustElement(`button[data-test="allow-all"]`).MustClick()
+
+	// Search
+	searchInputElement := page.MustElement("#desktopSearch")
+	searchInputElement.MustInput("xbox series x console")
+
+	searchButton := searchInputElement.MustNext()
+	searchButton.MustClick()
+
+	// Search results page (https://www.johnlewis.com/search)
+	productCardTitleElement := page.MustElementR("h2", "Microsoft Xbox Series X Console")
+
+	productCardLinkElement := productCardTitleElement.MustParent().MustParent()
+
+	productCardLinkElement.MustClick()
+
+	// Product details page
+	_, err := page.Element("#button--add-to-basket-out-of-stock")
 
 	if err == nil {
 		return OutOfStock
