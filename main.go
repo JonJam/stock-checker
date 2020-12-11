@@ -36,7 +36,8 @@ func main() {
 		// "Game": checkGame(),
 		// "John Lewis": checkJohnLewis(),
 		// "Amazon": checkAmazon(),
-		"Smyths": checkSmyths(),
+		// "Smyths": checkSmyths(),
+		"Currys": checkCurrys(),
 	}
 
 	log.Println(results)
@@ -54,10 +55,12 @@ func checkArgos() stockCheckResult {
 	defer browser.Close()
 
 	page := bypass.MustPage(browser)
+
 	defer page.Close()
 
 	// Home (https://www.argos.co.uk/)
 	page.MustNavigate("https://www.argos.co.uk/")
+	page.MustWaitLoad()
 
 	// Cookie banner
 	page.MustElement("#consent_prompt_submit").MustClick()
@@ -67,10 +70,14 @@ func checkArgos() stockCheckResult {
 	page.MustElement(`button[data-test="search-button"]`).MustClick()
 
 	// Search page (https://www.argos.co.uk/search/)
+	page.MustWaitLoad()
 	page.MustElementR("a", "Xbox Series X 1TB Console").MustClick()
 
 	// Out of stock page (https://www.argos.co.uk/vp/oos/xbox.html)
-	_, err := page.ElementR("h1", "Sorry, Xbox is currently unavailable.")
+	page.MustWaitLoad()
+
+	// Setting Sleeper to nil to not retry
+	_, err := page.Sleeper(nil).ElementR("h1", "Sorry, Xbox is currently unavailable.")
 
 	if err == nil {
 		return OutOfStock
@@ -92,13 +99,15 @@ func checkGame() stockCheckResult {
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
 	page.MustNavigate("https://www.game.co.uk/xbox-series-x")
+	page.MustWaitLoad()
 
 	consolesSection := page.MustElement("#contentPanelsConsoles")
 
 	consoleTitleElement := consolesSection.MustElementR("h3", "Series X")
+
 	panelItemElement := consoleTitleElement.MustParent()
 
-	_, err := panelItemElement.ElementR("a", "Out of sock")
+	_, err := panelItemElement.ElementR("a", "Out of stock")
 
 	if err == nil {
 		return OutOfStock
@@ -120,6 +129,7 @@ func checkJohnLewis() stockCheckResult {
 
 	// Home page
 	page.MustNavigate("https://www.johnlewis.com/")
+	page.MustWaitLoad()
 
 	// Cookie banner
 	page.MustElement(`button[data-test="allow-all"]`).MustClick()
@@ -132,6 +142,8 @@ func checkJohnLewis() stockCheckResult {
 	searchButton.MustClick()
 
 	// Search results page (https://www.johnlewis.com/search)
+	page.MustWaitLoad()
+
 	productCardTitleElement := page.MustElementR("h2", "Microsoft Xbox Series X Console")
 
 	productCardLinkElement := productCardTitleElement.MustParent().MustParent()
@@ -139,7 +151,10 @@ func checkJohnLewis() stockCheckResult {
 	productCardLinkElement.MustClick()
 
 	// Product details page
-	_, err := page.Element("#button--add-to-basket-out-of-stock")
+	page.MustWaitLoad()
+
+	// Setting Sleeper to nil to not retry
+	_, err := page.Sleeper(nil).Element("#button--add-to-basket-out-of-stock")
 
 	if err == nil {
 		return OutOfStock
@@ -161,8 +176,10 @@ func checkAmazon() stockCheckResult {
 
 	// Product details page
 	page.MustNavigate("https://www.amazon.co.uk/Xbox-RRT-00007-Series-X/dp/B08H93GKNJ/ref=sr_1_1")
+	page.MustWaitLoad()
 
-	_, err := page.Element("#buybox-see-all-buying-choices-announce")
+	// Setting Sleeper to nil to not retry
+	_, err := page.Sleeper(nil).Element("#buybox-see-all-buying-choices-announce")
 
 	if err == nil {
 		return OutOfStock
@@ -184,6 +201,7 @@ func checkSmyths() stockCheckResult {
 
 	// Product details page
 	page.MustNavigate("https://www.smythstoys.com/uk/en-gb/video-games-and-tablets/xbox-gaming/xbox-series-x-%7c-s/xbox-series-x-%7c-s-consoles/xbox-series-x-1tb-console/p/192012")
+	page.MustWaitLoad()
 
 	// Cookie banner
 	page.MustElementR("button", "Yes, I’m happy").MustClick()
@@ -200,6 +218,31 @@ func checkSmyths() stockCheckResult {
 		return OutOfStock
 	} else {
 		return InStock
+	}
+}
+
+func checkCurrys() stockCheckResult {
+	browser := rod.New().MustConnect()
+	defer browser.Close()
+
+	page := bypass.MustPage(browser)
+	defer page.Close()
+
+	// Product details page
+	page.MustNavigate("https://www.currys.co.uk/gbuk/gaming/console-gaming/consoles/microsoft-xbox-series-x-1-tb-10203371-pdt.html")
+	page.MustWaitLoad()
+
+	// Setting Sleeper to nil to not retry
+	_, err := page.Sleeper(nil).ElementR("li", "Sorry this item is out of stock")
+
+	if err == nil {
+		return OutOfStock
+	} else if err.Error() == "cannot find element" {
+		return InStock
+	} else {
+		log.Println(err)
+
+		return ErrorOccurred
 	}
 }
 
