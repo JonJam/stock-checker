@@ -35,7 +35,8 @@ func main() {
 		// "Argos": checkArgos(),
 		// "Game": checkGame(),
 		// "John Lewis": checkJohnLewis(),
-		"Amazon": checkAmazon(),
+		// "Amazon": checkAmazon(),
+		"Smyths": checkSmyths(),
 	}
 
 	log.Println(results)
@@ -53,6 +54,7 @@ func checkArgos() stockCheckResult {
 	defer browser.Close()
 
 	page := bypass.MustPage(browser)
+	defer page.Close()
 
 	// Home (https://www.argos.co.uk/)
 	page.MustNavigate("https://www.argos.co.uk/")
@@ -86,6 +88,7 @@ func checkGame() stockCheckResult {
 	defer browser.Close()
 
 	page := bypass.MustPage(browser)
+	defer page.Close()
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
 	page.MustNavigate("https://www.game.co.uk/xbox-series-x")
@@ -113,6 +116,7 @@ func checkJohnLewis() stockCheckResult {
 	defer browser.Close()
 
 	page := bypass.MustPage(browser)
+	defer page.Close()
 
 	// Home page
 	page.MustNavigate("https://www.johnlewis.com/")
@@ -153,6 +157,7 @@ func checkAmazon() stockCheckResult {
 	defer browser.Close()
 
 	page := bypass.MustPage(browser)
+	defer page.Close()
 
 	// Product details page
 	page.MustNavigate("https://www.amazon.co.uk/Xbox-RRT-00007-Series-X/dp/B08H93GKNJ/ref=sr_1_1")
@@ -167,6 +172,34 @@ func checkAmazon() stockCheckResult {
 		log.Println(err)
 
 		return ErrorOccurred
+	}
+}
+
+func checkSmyths() stockCheckResult {
+	browser := rod.New().MustConnect()
+	defer browser.Close()
+
+	page := bypass.MustPage(browser)
+	defer page.Close()
+
+	// Product details page
+	page.MustNavigate("https://www.smythstoys.com/uk/en-gb/video-games-and-tablets/xbox-gaming/xbox-series-x-%7c-s/xbox-series-x-%7c-s-consoles/xbox-series-x-1tb-console/p/192012")
+
+	// Cookie banner
+	page.MustElementR("button", "Yes, I’m happy").MustClick()
+
+	addToCartButton := page.MustElement("#addToCartButton")
+
+	value, err := addToCartButton.Attribute("disabled")
+
+	if err != nil {
+		log.Println(err)
+
+		return ErrorOccurred
+	} else if value != nil {
+		return OutOfStock
+	} else {
+		return InStock
 	}
 }
 
