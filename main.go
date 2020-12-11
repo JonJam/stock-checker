@@ -34,7 +34,8 @@ func main() {
 	results := map[string]stockCheckResult{
 		// "Argos": checkArgos(),
 		// "Game": checkGame(),
-		"John Lewis": checkJohnLewis(),
+		// "John Lewis": checkJohnLewis(),
+		"Amazon": checkAmazon(),
 	}
 
 	log.Println(results)
@@ -135,6 +136,28 @@ func checkJohnLewis() stockCheckResult {
 
 	// Product details page
 	_, err := page.Element("#button--add-to-basket-out-of-stock")
+
+	if err == nil {
+		return OutOfStock
+	} else if err.Error() == "cannot find element" {
+		return InStock
+	} else {
+		log.Println(err)
+
+		return ErrorOccurred
+	}
+}
+
+func checkAmazon() stockCheckResult {
+	browser := rod.New().MustConnect()
+	defer browser.Close()
+
+	page := bypass.MustPage(browser)
+
+	// Product details page
+	page.MustNavigate("https://www.amazon.co.uk/Xbox-RRT-00007-Series-X/dp/B08H93GKNJ/ref=sr_1_1")
+
+	_, err := page.Element("#buybox-see-all-buying-choices-announce")
 
 	if err == nil {
 		return OutOfStock
