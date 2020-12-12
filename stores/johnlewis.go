@@ -3,16 +3,15 @@ package stores
 import (
 	"log"
 
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
 )
 
-func CheckJohnLewis() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type JohnLewis struct {
+}
 
-	page := bypass.MustPage(browser)
-	defer page.Close()
+func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+	page := pool.Get(create)
+	defer pool.Put(page)
 
 	// Home page
 	page.MustNavigate("https://www.johnlewis.com/")
@@ -43,13 +42,24 @@ func CheckJohnLewis() StockCheckResult {
 	// Setting Sleeper to nil to not retry
 	_, err := page.Sleeper(nil).Element("#button--add-to-basket-out-of-stock")
 
+	const storeName = "John Lewis"
+
 	if err == nil {
-		return OutOfStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    OutOfStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    InStock,
+		}
 	} else {
 		log.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			storeName: storeName,
+			status:    Unknown,
+		}
 	}
 }

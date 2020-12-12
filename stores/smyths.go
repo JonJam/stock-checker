@@ -3,16 +3,15 @@ package stores
 import (
 	"log"
 
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
 )
 
-func CheckSmyths() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type Smyths struct {
+}
 
-	page := bypass.MustPage(browser)
-	defer page.Close()
+func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+	page := pool.Get(create)
+	defer pool.Put(page)
 
 	// Product details page
 	page.MustNavigate("https://www.smythstoys.com/uk/en-gb/video-games-and-tablets/xbox-gaming/xbox-series-x-%7c-s/xbox-series-x-%7c-s-consoles/xbox-series-x-1tb-console/p/192012")
@@ -25,13 +24,24 @@ func CheckSmyths() StockCheckResult {
 
 	value, err := addToCartButton.Attribute("disabled")
 
+	const storeName = "Smyths"
+
 	if err != nil {
 		log.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			storeName: storeName,
+			status:    Unknown,
+		}
 	} else if value != nil {
-		return OutOfStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    OutOfStock,
+		}
 	} else {
-		return InStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    InStock,
+		}
 	}
 }

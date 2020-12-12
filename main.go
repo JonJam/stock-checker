@@ -3,28 +3,47 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+
+	// "log"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/go-rod/bypass"
+	"github.com/go-rod/rod"
 	"github.com/jonjam/stock-checker/stores"
+	"github.com/jonjam/stock-checker/services"
+
+	"sync"
+
+	"github.com/go-rod/rod/lib/launcher"
 )
 
 func main() {
-	// TODO .rod config is for dev only
-
-	results := map[string]stores.StockCheckResult{
-		"Argos": stores.CheckArgos(),
-		// "Game": stores.CheckGame(),
-		// "John Lewis": stores.CheckJohnLewis(),
-		// "Amazon": stores.CheckAmazon(),
-		// "Smyths": stores.CheckSmyths(),
-		// "Currys": stores.CheckCurrys(),
-		// "ShopTo": stores.CheckShopTo(),
+	stores := []stores.Store{
+		stores.Argos{},
+		stores.Amazon{},
+		stores.Currys{},
+		stores.Game{},
+		stores.JohnLewis{},
+		stores.ShopTo{},
+		stores.Smyths{},
 	}
 
-	log.Println(results)
+	storeschecker.Run(stores)
+
+	// results := map[string]stores.StockCheckResult{
+	// 	"Argos": stores.CheckArgos(),
+	// 	// "Game": stores.CheckGame(),
+	// 	// "John Lewis": stores.CheckJohnLewis(),
+	// 	// "Amazon": stores.CheckAmazon(),
+	// 	// "Smyths": stores.CheckSmyths(),
+	// 	// "Currys": stores.CheckCurrys(),
+	// 	// "ShopTo": stores.CheckShopTo(),
+	// }
+
+	// log.Println(results)
 
 	// TODO Disabled while testing
 	// err := notify(results)

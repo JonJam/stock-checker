@@ -2,43 +2,16 @@ package stores
 
 import (
 	"log"
-	"time"
 
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
 )
 
-func CheckArgos() StockCheckResult {
-	// TODO Below setup should be common amongst all pages
-	l := launcher.New()
+type Argos struct {
+}
 
-	// TODO this should be controlled via config
-	devMode := true
-
-	if devMode {
-		l.Devtools(true)
-		l.Headless(false)
-	}
-
-	url := l.MustLaunch()
-
-	b := rod.New().ControlURL(url)
-
-	if devMode {
-		b.Trace(true)
-		b.SlowMotion(time.Second)
-	}
-
-	b.MustConnect()
-	defer b.Close()
-
-	page := bypass.MustPage(b)
-	defer page.Close()
-
-	if devMode {
-		page.MustWindowFullscreen()
-	}
+func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+	page := pool.Get(create)
+	defer pool.Put(page)
 
 	// Home (https://www.argos.co.uk/)
 	page.MustNavigate("https://www.argos.co.uk/")
@@ -61,13 +34,24 @@ func CheckArgos() StockCheckResult {
 	// Setting Sleeper to nil to not retry
 	_, err := page.Sleeper(nil).ElementR("h1", "Sorry, Xbox is currently unavailable.")
 
+	const storeName = "Argos"
+
 	if err == nil {
-		return OutOfStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    OutOfStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    InStock,
+		}
 	} else {
 		log.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			storeName: storeName,
+			status:    Unknown,
+		}
 	}
 }

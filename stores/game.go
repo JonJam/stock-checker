@@ -3,16 +3,15 @@ package stores
 import (
 	"log"
 
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
 )
 
-func checkGame() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type Game struct {
+}
 
-	page := bypass.MustPage(browser)
-	defer page.Close()
+func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+	page := pool.Get(create)
+	defer pool.Put(page)
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
 	page.MustNavigate("https://www.game.co.uk/xbox-series-x")
@@ -26,13 +25,24 @@ func checkGame() StockCheckResult {
 
 	_, err := panelItemElement.ElementR("a", "Out of stock")
 
+	const storeName = "Game"
+
 	if err == nil {
-		return OutOfStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    OutOfStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			storeName: storeName,
+			status:    InStock,
+		}
 	} else {
 		log.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			storeName: storeName,
+			status:    Unknown,
+		}
 	}
 }
