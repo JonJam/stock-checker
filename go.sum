@@ -2,6 +2,7 @@ github.com/go-rod/bypass v0.2.4 h1:NHgY1G1vRmE+razr0BtXQxEWJSDdXK5XC+slPXd9dD4=
 github.com/go-rod/bypass v0.2.4/go.mod h1:kNVJPQnX/1wY8V+Az2RL3C7JmodQuaBCGE+XjFaYm78=
 github.com/go-rod/rod v0.84.2 h1:ICJaJa6pRp/uIr58hjEpVP34Cb+KoBEKSPThy3kvI/8=
 github.com/go-rod/rod v0.84.2/go.mod h1:AHePgzZdfC41qI5+x40r0Zvo+sW/XTOcNw8NvXAeJ9E=
+github.com/go-rod/rod v0.85.0 h1:QPyYvG0OZ94SxKaWZyIiaO/rB02NPpp8GAmxNgPU768=
 github.com/ysmood/goob v0.3.0 h1:XZ51cZJ4W3WCoCiUktixzMIQF86W7G5VFL4QQ/Q2uS0=
 github.com/ysmood/goob v0.3.0/go.mod h1:S3lq113Y91y1UBf1wj1pFOxeahvfKkCk6mTWTWbDdWs=
 github.com/ysmood/got v0.8.6 h1:SdxHXHjKJqB8YXNxpQmZy9hppKxfG8GV0C1B7lj/Yxo=

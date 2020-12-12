@@ -15,13 +15,13 @@ func main() {
 	// TODO .rod config is for dev only
 
 	results := map[string]stores.StockCheckResult{
-		// "Argos": stores.CheckArgos(),
+		"Argos": stores.CheckArgos(),
 		// "Game": stores.CheckGame(),
 		// "John Lewis": stores.CheckJohnLewis(),
 		// "Amazon": stores.CheckAmazon(),
 		// "Smyths": stores.CheckSmyths(),
 		// "Currys": stores.CheckCurrys(),
-		"ShopTo": stores.CheckShopTo(),
+		// "ShopTo": stores.CheckShopTo(),
 	}
 
 	log.Println(results)

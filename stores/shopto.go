@@ -9,6 +9,7 @@ import (
 
 func CheckShopTo() StockCheckResult {
 	browser := rod.New().MustConnect()
+
 	defer browser.Close()
 
 	page := bypass.MustPage(browser)

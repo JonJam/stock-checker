@@ -2,18 +2,43 @@ package stores
 
 import (
 	"log"
+	"time"
 
 	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 )
 
 func CheckArgos() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+	// TODO Below setup should be common amongst all pages
+	l := launcher.New()
 
-	page := bypass.MustPage(browser)
+	// TODO this should be controlled via config
+	devMode := true
 
+	if devMode {
+		l.Devtools(true)
+		l.Headless(false)
+	}
+
+	url := l.MustLaunch()
+
+	b := rod.New().ControlURL(url)
+
+	if devMode {
+		b.Trace(true)
+		b.SlowMotion(time.Second)
+	}
+
+	b.MustConnect()
+	defer b.Close()
+
+	page := bypass.MustPage(b)
 	defer page.Close()
+
+	if devMode {
+		page.MustWindowFullscreen()
+	}
 
 	// Home (https://www.argos.co.uk/)
 	page.MustNavigate("https://www.argos.co.uk/")
