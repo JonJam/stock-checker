@@ -98,16 +98,15 @@ func createGetPageFunc(browser *rod.Browser, pool rod.PagePool) func() *rod.Page
 
 	// Gets a page from the pool and configures a timeout for store to perform all operations with it
 	return func() *rod.Page {
-		page := pool.Get(create)
-
-		// TODO Move to config
-		return page.Timeout(10 * time.Minute)
+		// TODO Implement timeout
+		return pool.Get(create)
 	}
 }
 
 func createReleasePageFunc(pool rod.PagePool) func(*rod.Page) {
 	return func(page *rod.Page) {
-		pool.Put(page.CancelTimeout())
+		// TODO Implement cancel timeout
+		pool.Put(page)
 	}
 }
 
