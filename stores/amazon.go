@@ -1,33 +1,60 @@
 package stores
 
 import (
-	"log"
-
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
+	"github.com/jonjam/stock-checker/util"
 )
 
-func CheckAmazon() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type Amazon struct {
+}
 
-	page := bypass.MustPage(browser)
-	defer page.Close()
+func (a Amazon) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
+	const storeName = "Amazon"
+
+	page := getPage()
+	if page == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	defer releasePage(page)
 
 	// Product details page
-	page.MustNavigate("https://www.amazon.co.uk/Xbox-RRT-00007-Series-X/dp/B08H93GKNJ/ref=sr_1_1")
-	page.MustWaitLoad()
+	if err := page.Navigate("https://www.amazon.co.uk/Xbox-RRT-00007-Series-X/dp/B08H93GKNJ/ref=sr_1_1"); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err := page.WaitLoad(); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Setting Sleeper to nil to not retry
-	_, err := page.Sleeper(nil).Element("#buybox-see-all-buying-choices-announce")
-
-	if err == nil {
-		return OutOfStock
+	if _, err := page.Sleeper(nil).Element("#add-to-cart-button"); err == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    InStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    OutOfStock,
+		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
 	}
 }

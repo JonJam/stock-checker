@@ -1,38 +1,89 @@
 package stores
 
 import (
-	"log"
-
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
+	"github.com/jonjam/stock-checker/util"
 )
 
-func checkGame() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type Game struct {
+}
 
-	page := bypass.MustPage(browser)
-	defer page.Close()
+func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
+	const storeName = "Game"
+
+	page := getPage()
+	if page == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	defer releasePage(page)
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
-	page.MustNavigate("https://www.game.co.uk/xbox-series-x")
-	page.MustWaitLoad()
+	if err := page.Navigate("https://www.game.co.uk/xbox-series-x"); err != nil {
+		util.Logger.Println(err)
 
-	consolesSection := page.MustElement("#contentPanelsConsoles")
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err := page.WaitLoad(); err != nil {
+		util.Logger.Println(err)
 
-	consoleTitleElement := consolesSection.MustElementR("h3", "Series X")
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
-	panelItemElement := consoleTitleElement.MustParent()
+	consolesSection, err := page.Element("#contentPanelsConsoles")
+	if err != nil {
+		util.Logger.Println(err)
 
-	_, err := panelItemElement.ElementR("a", "Out of stock")
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
-	if err == nil {
-		return OutOfStock
+	consoleTitle, err := consolesSection.ElementR("h3", "Series X")
+	if err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	panelItem, err := consoleTitle.Parent()
+	if err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	if _, err = panelItem.ElementR("a", "Out of stock"); err == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    OutOfStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    InStock,
+		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
 	}
 }

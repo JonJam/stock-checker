@@ -1,33 +1,60 @@
 package stores
 
 import (
-	"log"
-
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
+	"github.com/jonjam/stock-checker/util"
 )
 
-func CheckShopTo() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type ShopTo struct {
+}
 
-	page := bypass.MustPage(browser)
-	defer page.Close()
+func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
+	const storeName = "ShopTo"
+
+	page := getPage()
+	if page == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	defer releasePage(page)
 
 	// Product details page
-	page.MustNavigate("https://www.shopto.net/en/xbxhw01-xbox-series-x-p191471/?utm_source=website&utm_medium=banner&utm_campaign=Xbox%20Series%20X")
-	page.MustWaitLoad()
+	if err := page.Navigate("https://www.shopto.net/en/xbxhw01-xbox-series-x-p191471/?utm_source=website&utm_medium=banner&utm_campaign=Xbox%20Series%20X"); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err := page.WaitLoad(); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Setting Sleeper to nil to not retry
-	_, err := page.Sleeper(nil).ElementR("h1", "404")
-
-	if err == nil {
-		return OutOfStock
+	if _, err := page.Sleeper(nil).ElementR("h1", "404"); err == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    OutOfStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    InStock,
+		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
 	}
 }

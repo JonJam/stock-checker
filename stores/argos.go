@@ -1,48 +1,151 @@
 package stores
 
 import (
-	"log"
-
-	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/proto"
+	"github.com/jonjam/stock-checker/util"
 )
 
-func CheckArgos() StockCheckResult {
-	browser := rod.New().MustConnect()
-	defer browser.Close()
+type Argos struct {
+}
 
-	page := bypass.MustPage(browser)
+func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
+	const storeName = "Argos"
 
-	defer page.Close()
+	page := getPage()
+	if page == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	defer releasePage(page)
 
 	// Home (https://www.argos.co.uk/)
-	page.MustNavigate("https://www.argos.co.uk/")
-	page.MustWaitLoad()
+	if err := page.Navigate("https://www.argos.co.uk/"); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err := page.WaitLoad(); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Cookie banner
-	page.MustElement("#consent_prompt_submit").MustClick()
+	cookieBannerSubmit, err := page.Element("#consent_prompt_submit")
+	if err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err = cookieBannerSubmit.Click(proto.InputMouseButtonLeft); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Search
-	page.MustElement("#searchTerm").MustInput("xbox series x console")
-	page.MustElement(`button[data-test="search-button"]`).MustClick()
+	searchInput, err := page.Element("#searchTerm")
+	if err != nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err = searchInput.Input("xbox series x console"); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	searchButton, err := page.Element(`button[data-test="search-button"]`)
+	if err != nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err = searchButton.Click(proto.InputMouseButtonLeft); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Search page (https://www.argos.co.uk/search/)
-	page.MustWaitLoad()
-	page.MustElementR("a", "Xbox Series X 1TB Console").MustClick()
+	if err := page.WaitLoad(); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	consoleLink, err := page.ElementR("a", "Xbox Series X 1TB Console")
+	if err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err = consoleLink.Click(proto.InputMouseButtonLeft); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Out of stock page (https://www.argos.co.uk/vp/oos/xbox.html)
-	page.MustWaitLoad()
+	if err := page.WaitLoad(); err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
 	// Setting Sleeper to nil to not retry
-	_, err := page.Sleeper(nil).ElementR("h1", "Sorry, Xbox is currently unavailable.")
-
-	if err == nil {
-		return OutOfStock
+	if _, err = page.Sleeper(nil).ElementR("h1", "Sorry, Xbox is currently unavailable."); err == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    OutOfStock,
+		}
 	} else if err.Error() == "cannot find element" {
-		return InStock
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    InStock,
+		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
-		return ErrorOccurred
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
 	}
 }
