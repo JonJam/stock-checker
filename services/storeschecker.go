@@ -1,14 +1,13 @@
 package services
 
 import (
-	"log"
 	"time"
 
 	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
 	"github.com/jonjam/stock-checker/stores"
+	"github.com/jonjam/stock-checker/util"
 )
 
 func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
@@ -18,20 +17,20 @@ func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 	url, err := createControlURL(devMode)
 
 	if err != nil {
-		log.Fatalln(err)
+		util.Logger.Fatalln(err)
 	}
 
 	browser, err := createBrowser(url, devMode)
 
 	if err != nil {
-		log.Fatalln(err)
+		util.Logger.Fatalln(err)
 	}
 
 	defer func() {
 		err := browser.Close()
 
 		if err != nil {
-			log.Println(err)
+			util.Logger.Println(err)
 		}
 	}()
 
@@ -41,17 +40,18 @@ func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 		err := p.Close()
 
 		if err != nil {
-			log.Println(err)
+			util.Logger.Println(err)
 		}
 	})
 
-	create := createCreatePageFunc(browser, devMode)
-
 	c := make(chan stores.StockCheckResult)
+
+	get := createGetPageFunc(browser, pool)
+	release := createReleasePageFunc(pool)
 
 	for _, s := range storesSlice {
 		go func(store stores.Store) {
-			c <- store.Check(pool, create)
+			c <- store.Check(get, release)
 		}(s)
 	}
 
@@ -93,14 +93,32 @@ func createBrowser(url string, devMode bool) (*rod.Browser, error) {
 	return browser, nil
 }
 
-func createCreatePageFunc(browser *rod.Browser, devMode bool) func() *rod.Page {
+func createGetPageFunc(browser *rod.Browser, pool rod.PagePool) func() *rod.Page {
+	create := createCreatePageFunc(browser)
+
+	// Gets a page from the pool and configures a timeout for store to perform all operations with it
+	return func() *rod.Page {
+		page := pool.Get(create)
+
+		// TODO Move to config
+		return page.Timeout(10 * time.Minute)
+	}
+}
+
+func createReleasePageFunc(pool rod.PagePool) func(*rod.Page) {
+	return func(page *rod.Page) {
+		pool.Put(page.CancelTimeout())
+	}
+}
+
+func createCreatePageFunc(browser *rod.Browser) func() *rod.Page {
 	// This func will create a new configured page will be contained within a different incognito browser window.
 	// It returns nil when an error occurs rather than exposing error due to https://pkg.go.dev/github.com/go-rod/rod#PagePool.Get
 	return func() *rod.Page {
 		browser, err := browser.Incognito()
 
 		if err != nil {
-			log.Println(err)
+			util.Logger.Println(err)
 
 			return nil
 		}
@@ -108,21 +126,9 @@ func createCreatePageFunc(browser *rod.Browser, devMode bool) func() *rod.Page {
 		page, err := bypass.Page(browser)
 
 		if err != nil {
-			log.Println(err)
+			util.Logger.Println(err)
 
 			return nil
-		}
-
-		if devMode {
-			err = page.SetWindow(&proto.BrowserBounds{
-				WindowState: proto.BrowserWindowStateFullscreen,
-			})
-
-			if err != nil {
-				log.Println(err)
-
-				return nil
-			}
 		}
 
 		return page

@@ -32,5 +32,5 @@ func (s StockCheckResult) String() string {
 }
 
 type Store interface {
-	Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult
+	Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult
 }

@@ -1,32 +1,29 @@
 package stores
 
 import (
-	"log"
-
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/jonjam/stock-checker/util"
 )
 
 type Argos struct {
 }
 
-func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
 	const storeName = "Argos"
 
-	page := pool.Get(create)
-
+	page := getPage()
 	if page == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
-
-	defer pool.Put(page)
+	defer releasePage(page)
 
 	// Home (https://www.argos.co.uk/)
 	if err := page.Navigate("https://www.argos.co.uk/"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -34,7 +31,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -45,7 +42,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 	// Cookie banner
 	cookieBannerSubmit, err := page.Element("#consent_prompt_submit")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -53,7 +50,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 		}
 	}
 	if err = cookieBannerSubmit.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -70,7 +67,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 		}
 	}
 	if err = searchInput.Input("xbox series x console"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -86,7 +83,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 		}
 	}
 	if err = searchButton.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -96,7 +93,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 
 	// Search page (https://www.argos.co.uk/search/)
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -106,7 +103,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 
 	consoleLink, err := page.ElementR("a", "Xbox Series X 1TB Console")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -114,7 +111,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 		}
 	}
 	if err = consoleLink.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -124,7 +121,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 
 	// Out of stock page (https://www.argos.co.uk/vp/oos/xbox.html)
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -144,7 +141,7 @@ func (a Argos) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResul
 			Status:    InStock,
 		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,

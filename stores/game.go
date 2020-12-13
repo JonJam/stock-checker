@@ -1,30 +1,28 @@
 package stores
 
 import (
-	"log"
-
 	"github.com/go-rod/rod"
+	"github.com/jonjam/stock-checker/util"
 )
 
 type Game struct {
 }
 
-func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
 	const storeName = "Game"
 
-	page := pool.Get(create)
+	page := getPage()
 	if page == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
-
-	defer pool.Put(page)
+	defer releasePage(page)
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
 	if err := page.Navigate("https://www.game.co.uk/xbox-series-x"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -32,7 +30,7 @@ func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -42,7 +40,7 @@ func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult
 
 	consolesSection, err := page.Element("#contentPanelsConsoles")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -52,7 +50,7 @@ func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult
 
 	consoleTitle, err := consolesSection.ElementR("h3", "Series X")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -62,7 +60,7 @@ func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult
 
 	panelItem, err := consoleTitle.Parent()
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -81,7 +79,7 @@ func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult
 			Status:    InStock,
 		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,

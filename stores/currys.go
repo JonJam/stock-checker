@@ -1,31 +1,28 @@
 package stores
 
 import (
-	"log"
-
 	"github.com/go-rod/rod"
+	"github.com/jonjam/stock-checker/util"
 )
 
 type Currys struct {
 }
 
-func (c Currys) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+func (c Currys) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
 	const storeName = "Currys"
 
-	page := pool.Get(create)
-
+	page := getPage()
 	if page == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
-
-	defer pool.Put(page)
+	defer releasePage(page)
 
 	// Product details page
 	if err := page.Navigate("https://www.currys.co.uk/gbuk/gaming/console-gaming/consoles/microsoft-xbox-series-x-1-tb-10203371-pdt.html"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -33,7 +30,7 @@ func (c Currys) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -53,7 +50,7 @@ func (c Currys) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 			Status:    InStock,
 		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,

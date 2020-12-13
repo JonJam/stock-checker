@@ -1,31 +1,29 @@
 package stores
 
 import (
-	"log"
-
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/jonjam/stock-checker/util"
 )
 
 type Smyths struct {
 }
 
-func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+func (s Smyths) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
 	const storeName = "Smyths"
 
-	page := pool.Get(create)
+	page := getPage()
 	if page == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
-
-	defer pool.Put(page)
+	defer releasePage(page)
 
 	// Product details page
 	if err := page.Navigate("https://www.smythstoys.com/uk/en-gb/video-games-and-tablets/xbox-gaming/xbox-series-x-%7c-s/xbox-series-x-%7c-s-consoles/xbox-series-x-1tb-console/p/192012"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -33,7 +31,7 @@ func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -44,7 +42,7 @@ func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 	// Cookie banner
 	cookieBanner, err := page.ElementR("button", "Yes, I’m happy")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -52,7 +50,7 @@ func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 		}
 	}
 	if err = cookieBanner.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -62,7 +60,7 @@ func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 
 	addToCartButton, err := page.Element("#addToCartButton")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -71,7 +69,7 @@ func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 	}
 
 	if value, err := addToCartButton.Attribute("disabled"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,

@@ -1,31 +1,29 @@
 package stores
 
 import (
-	"log"
-
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/jonjam/stock-checker/util"
 )
 
 type JohnLewis struct {
 }
 
-func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
 	const storeName = "John Lewis"
 
-	page := pool.Get(create)
+	page := getPage()
 	if page == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
-
-	defer pool.Put(page)
+	defer releasePage(page)
 
 	// Home page
 	if err := page.Navigate("https://www.johnlewis.com/"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -33,7 +31,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -44,7 +42,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 	// Cookie banner
 	cookieBannerSubmit, err := page.Element(`button[data-test="allow-all"]`)
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -53,7 +51,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 	}
 
 	if err = cookieBannerSubmit.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -64,7 +62,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 	// Search
 	searchInput, err := page.Element("#desktopSearch")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -73,7 +71,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 	}
 
 	if err = searchInput.Input("xbox series x console"); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -83,7 +81,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	searchButton, err := searchInput.Next()
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -92,7 +90,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 	}
 
 	if err = searchButton.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -102,7 +100,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	// Search results page (https://www.johnlewis.com/search)
 	if err = page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -112,7 +110,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	productCardTitle, err := page.ElementR("h2", "Microsoft Xbox Series X Console")
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -122,7 +120,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	productCardLinkDiv, err := productCardTitle.Parent()
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -132,7 +130,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	productCardLink, err := productCardLinkDiv.Parent()
 	if err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -141,7 +139,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 	}
 
 	if err := productCardLink.Click(proto.InputMouseButtonLeft); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -151,7 +149,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	// Product details page
 	if err = page.WaitLoad(); err != nil {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -171,7 +169,7 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 			Status:    InStock,
 		}
 	} else {
-		log.Println(err)
+		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,

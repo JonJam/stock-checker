@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"sort"
 
-	"log"
-
 	"github.com/jonjam/stock-checker/services"
 	"github.com/jonjam/stock-checker/stores"
+	"github.com/jonjam/stock-checker/util"
 )
 
 func main() {
@@ -45,7 +44,7 @@ func notify(results []stores.StockCheckResult) {
 		body = fmt.Sprintf(body+"%v\n", v)
 	}
 
-	log.Println(body)
+	util.Logger.Println(body)
 
 	// TODO Disabled while testing (in dev mode)
 	// msgData := url.Values{}
