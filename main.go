@@ -1,23 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"sort"
 
-	// "log"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
+	"log"
 
-	"github.com/go-rod/bypass"
-	"github.com/go-rod/rod"
-	"github.com/jonjam/stock-checker/stores"
 	"github.com/jonjam/stock-checker/services"
-
-	"sync"
-
-	"github.com/go-rod/rod/lib/launcher"
+	"github.com/jonjam/stock-checker/stores"
 )
 
 func main() {
@@ -31,74 +21,71 @@ func main() {
 		stores.Smyths{},
 	}
 
-	storeschecker.Run(stores)
+	results := services.CheckStores(stores)
 
-	// results := map[string]stores.StockCheckResult{
-	// 	"Argos": stores.CheckArgos(),
-	// 	// "Game": stores.CheckGame(),
-	// 	// "John Lewis": stores.CheckJohnLewis(),
-	// 	// "Amazon": stores.CheckAmazon(),
-	// 	// "Smyths": stores.CheckSmyths(),
-	// 	// "Currys": stores.CheckCurrys(),
-	// 	// "ShopTo": stores.CheckShopTo(),
+	log.Println(results)
+
+	notify(results)
+}
+
+// Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
+func notify(results []stores.StockCheckResult) {
+	// TODO should be config DO NOT COMMIT
+	// accountSid := ""
+	// authToken := ""
+	// numberTo := ""
+	// numberFrom := ""
+	// requestURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", accountSid)
+
+	body := "Stock checker results:\n"
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].StoreName < results[j].StoreName
+	})
+
+	for _, v := range results {
+		body = fmt.Sprintf(body+"%v\n", v)
+	}
+
+	log.Println(body)
+
+	// TODO Disabled while testing (in dev mode)
+	// msgData := url.Values{}
+	// msgData.Set("To", numberTo)
+	// msgData.Set("From", numberFrom)
+	// msgData.Set("Body", body)
+	// msgDataReader := *strings.NewReader(msgData.Encode())
+
+	// client := &http.Client{}
+	// req, err := http.NewRequest("POST", requestURL, &msgDataReader)
+
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
 	// }
 
-	// log.Println(results)
+	// req.SetBasicAuth(accountSid, authToken)
+	// req.Header.Add("Accept", "application/json")
+	// req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	// TODO Disabled while testing
-	// err := notify(results)
+	// resp, err := client.Do(req)
+
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	// if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
+	// 	log.Println(fmt.Errorf("unexpected status code from Twilio: %v", resp.StatusCode))
+	// 	return
+	// }
+
+	// // Success HTTP Status but need to check response for error
+	// var data map[string]interface{}
+	// decoder := json.NewDecoder(resp.Body)
+	// err = decoder.Decode(&data)
 
 	// if err != nil {
 	// 	log.Println(err)
 	// }
-}
-
-// Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
-func notify(results map[string]stores.StockCheckResult) error {
-	// TODO should be config DO NOT COMMIT
-	accountSid := ""
-	authToken := ""
-	numberTo := ""
-	numberFrom := ""
-	requestURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", accountSid)
-
-	body := "Stock checker results:\n"
-
-	for k, v := range results {
-		body = fmt.Sprintf(body+"%s: %s\n", k, v.String())
-	}
-
-	msgData := url.Values{}
-	msgData.Set("To", numberTo)
-	msgData.Set("From", numberFrom)
-	msgData.Set("Body", body)
-	msgDataReader := *strings.NewReader(msgData.Encode())
-
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", requestURL, &msgDataReader)
-
-	if err != nil {
-		return err
-	}
-
-	req.SetBasicAuth(accountSid, authToken)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return err
-	}
-
-	if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		return fmt.Errorf("unexpected status code from Twilio: %v", resp.StatusCode)
-	}
-
-	// Success HTTP Status but need to check response for error
-	var data map[string]interface{}
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&data)
-
-	return err
 }

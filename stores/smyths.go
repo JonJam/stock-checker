@@ -30,18 +30,18 @@ func (s Smyths) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 		log.Println(err)
 
 		return StockCheckResult{
-			storeName: storeName,
-			status:    Unknown,
+			StoreName: storeName,
+			Status:    Unknown,
 		}
 	} else if value != nil {
 		return StockCheckResult{
-			storeName: storeName,
-			status:    OutOfStock,
+			StoreName: storeName,
+			Status:    OutOfStock,
 		}
 	} else {
 		return StockCheckResult{
-			storeName: storeName,
-			status:    InStock,
+			StoreName: storeName,
+			Status:    InStock,
 		}
 	}
 }

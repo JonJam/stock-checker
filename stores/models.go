@@ -1,6 +1,10 @@
 package stores
 
-import "github.com/go-rod/rod"
+import (
+	"fmt"
+
+	"github.com/go-rod/rod"
+)
 
 // Based off: https://programming.guide/go/define-enumeration-string.html
 type StockStatus int
@@ -19,8 +23,12 @@ func (s StockStatus) String() string {
 }
 
 type StockCheckResult struct {
-	storeName string
-	status    StockStatus
+	StoreName string
+	Status    StockStatus
+}
+
+func (s StockCheckResult) String() string {
+	return fmt.Sprintf("%s: %s", s.StoreName, s.Status.String())
 }
 
 type Store interface {

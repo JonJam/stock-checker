@@ -1,28 +1,27 @@
-package main
+package services
 
 import (
 	"time"
 
 	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
-	"github.com/jonjam/stock-checker/stores"
-
-	"sync"
-
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/jonjam/stock-checker/stores"
 )
 
-func Run(storesSlice []stores.Store) []stores.StockCheckResult{
+func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 	// TODO this should be controlled via config
 	devMode := true
 
-	url := createControlUrl(devMode)
+	url := createControlURL(devMode)
 
 	browser := createBrowser(url, devMode)
 	defer browser.MustClose()
 
-	// TODO This should be controlled via config
+	// TODO This should be controlled via config. Dev: 1, Prod:3
 	pool := rod.NewPagePool(3)
+	defer pool.Cleanup(func(p *rod.Page) { p.MustClose() })
+
 	create := createCreatePageFunc(browser, devMode)
 
 	c := make(chan stores.StockCheckResult)
@@ -33,18 +32,17 @@ func Run(storesSlice []stores.Store) []stores.StockCheckResult{
 		}(s)
 	}
 
-	results := make([]stores.StockCheckResult, 0, len(storesSlice))
+	numOfStores := len(storesSlice)
+	results := make([]stores.StockCheckResult, 0, numOfStores)
 
-	for i := 0; i < len(storesSlice); i++ {
+	for i := 0; i < numOfStores; i++ {
 		results = append(results, <-c)
 	}
-
-	pool.Cleanup(func(p *rod.Page) { p.MustClose() })
 
 	return results
 }
 
-func createControlUrl(devMode bool) string {
+func createControlURL(devMode bool) string {
 	launcher := launcher.New()
 
 	if devMode {

@@ -46,20 +46,20 @@ func (j JohnLewis) Check(pool rod.PagePool, create func() *rod.Page) StockCheckR
 
 	if err == nil {
 		return StockCheckResult{
-			storeName: storeName,
-			status:    OutOfStock,
+			StoreName: storeName,
+			Status:    OutOfStock,
 		}
 	} else if err.Error() == "cannot find element" {
 		return StockCheckResult{
-			storeName: storeName,
-			status:    InStock,
+			StoreName: storeName,
+			Status:    InStock,
 		}
 	} else {
 		log.Println(err)
 
 		return StockCheckResult{
-			storeName: storeName,
-			status:    Unknown,
+			StoreName: storeName,
+			Status:    Unknown,
 		}
 	}
 }

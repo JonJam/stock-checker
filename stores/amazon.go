@@ -18,26 +18,26 @@ func (a Amazon) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResu
 	page.MustWaitLoad()
 
 	// Setting Sleeper to nil to not retry
-	_, err := page.Sleeper(nil).Element("#buybox-see-all-buying-choices-announce")
+	_, err := page.Sleeper(nil).Element("#add-to-cart-button")
 
 	const storeName = "Amazon"
 
 	if err == nil {
 		return StockCheckResult{
-			storeName: storeName,
-			status:    OutOfStock,
+			StoreName: storeName,
+			Status:    InStock,
 		}
 	} else if err.Error() == "cannot find element" {
 		return StockCheckResult{
-			storeName: storeName,
-			status:    InStock,
+			StoreName: storeName,
+			Status:    OutOfStock,
 		}
 	} else {
 		log.Println(err)
 
 		return StockCheckResult{
-			storeName: storeName,
-			status:    Unknown,
+			StoreName: storeName,
+			Status:    Unknown,
 		}
 	}
 }
