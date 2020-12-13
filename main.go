@@ -23,8 +23,6 @@ func main() {
 
 	results := services.CheckStores(stores)
 
-	log.Println(results)
-
 	notify(results)
 }
 

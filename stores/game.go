@@ -10,24 +10,67 @@ type Game struct {
 }
 
 func (g Game) Check(pool rod.PagePool, create func() *rod.Page) StockCheckResult {
+	const storeName = "Game"
+
 	page := pool.Get(create)
+	if page == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
 	defer pool.Put(page)
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
-	page.MustNavigate("https://www.game.co.uk/xbox-series-x")
-	page.MustWaitLoad()
+	if err := page.Navigate("https://www.game.co.uk/xbox-series-x"); err != nil {
+		log.Println(err)
 
-	consolesSection := page.MustElement("#contentPanelsConsoles")
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+	if err := page.WaitLoad(); err != nil {
+		log.Println(err)
 
-	consoleTitleElement := consolesSection.MustElementR("h3", "Series X")
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
-	panelItemElement := consoleTitleElement.MustParent()
+	consolesSection, err := page.Element("#contentPanelsConsoles")
+	if err != nil {
+		log.Println(err)
 
-	_, err := panelItemElement.ElementR("a", "Out of stock")
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
 
-	const storeName = "Game"
+	consoleTitle, err := consolesSection.ElementR("h3", "Series X")
+	if err != nil {
+		log.Println(err)
 
-	if err == nil {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	panelItem, err := consoleTitle.Parent()
+	if err != nil {
+		log.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	if _, err = panelItem.ElementR("a", "Out of stock"); err == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    OutOfStock,
