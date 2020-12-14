@@ -1,0 +1,18 @@
+# See https://golangci-lint.run/usage/configuration/ for details
+linters:
+  disable-all: true
+  enable:
+    # Default enabled linters
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - varcheck
+
+    # Added
+    - gofmt
+    - golint
