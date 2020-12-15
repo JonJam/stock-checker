@@ -14,5 +14,6 @@ linters:
     - varcheck
 
     # Added
-    - gofmt
+    # goimports aligns with VS Code setup and includes gofmt
+    - goimports
     - golint
