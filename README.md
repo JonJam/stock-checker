@@ -1,6 +1,7 @@
 # stock-checker
 
 ![CI](https://github.com/jonjam/stock-checker/workflows/CI/badge.svg?branch=main)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=stock-checker)](https://sonarcloud.io/dashboard?id=stock-checker)
 
 Inspired by [How To Get a PlayStation 5 When It's Always Out of Stock](https://dev.to/marisayou/how-to-get-a-playstation-5-when-it-s-always-out-of-stock-5d4i).
 
