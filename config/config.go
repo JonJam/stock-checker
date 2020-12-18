@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO test this works
 func init() {
 	// Setup
 	viper.SetConfigName("config")
