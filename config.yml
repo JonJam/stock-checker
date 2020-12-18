@@ -1,0 +1,13 @@
+developmentMode: false
+
+scheduler:
+  interval: 1
+
+rod:
+  pagePoolSize: 3
+
+twilio:
+  accountSid: ""
+  authToken: ""
+  numberTo: ""
+  numberFrom: ""
