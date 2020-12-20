@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/jonjam/stock-checker/config"
 	"github.com/jonjam/stock-checker/services"
 	"github.com/jonjam/stock-checker/stores"
 	"github.com/jonjam/stock-checker/util"
@@ -13,8 +14,8 @@ import (
 func main() {
 	s := gocron.NewScheduler(time.UTC)
 
-	// TODO Configure via config
-	_, err := s.Every(1).Hour().Do(task)
+	i := config.GetSchedulerConfig().Interval
+	_, err := s.Every(i).Hour().Do(task)
 
 	if err != nil {
 		util.Logger.Fatalln(err)
@@ -38,7 +39,12 @@ func task() {
 
 	results := services.CheckStores(stores)
 
-	services.Notify(results)
+	if config.IsDevMode() {
+		util.Logger.Println(results)
+	} else {
+		// TODO Only notify if one is true
+		services.Notify(results)
+	}
 
 	util.Logger.Println("Task complete")
 }

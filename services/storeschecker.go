@@ -6,21 +6,19 @@ import (
 	"github.com/go-rod/bypass"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/jonjam/stock-checker/config"
 	"github.com/jonjam/stock-checker/stores"
 	"github.com/jonjam/stock-checker/util"
 )
 
 func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
-	// TODO this should be controlled via config
-	devMode := true
-
-	url, err := createControlURL(devMode)
+	url, err := createControlURL()
 
 	if err != nil {
 		util.Logger.Fatalln(err)
 	}
 
-	browser, err := createBrowser(url, devMode)
+	browser, err := createBrowser(url)
 
 	if err != nil {
 		util.Logger.Fatalln(err)
@@ -34,8 +32,7 @@ func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 		}
 	}()
 
-	// TODO This should be controlled via config. Dev: 1, Prod:3
-	pool := rod.NewPagePool(3)
+	pool := rod.NewPagePool(config.GetRodConfig().PagePoolSize)
 	defer pool.Cleanup(func(p *rod.Page) {
 		err := p.Close()
 
@@ -65,10 +62,10 @@ func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 	return results
 }
 
-func createControlURL(devMode bool) (string, error) {
+func createControlURL() (string, error) {
 	launcher := launcher.New()
 
-	if devMode {
+	if config.IsDevMode() {
 		launcher.Devtools(true)
 		launcher.Headless(false)
 	}
@@ -76,10 +73,10 @@ func createControlURL(devMode bool) (string, error) {
 	return launcher.Launch()
 }
 
-func createBrowser(url string, devMode bool) (*rod.Browser, error) {
+func createBrowser(url string) (*rod.Browser, error) {
 	browser := rod.New().ControlURL(url)
 
-	if devMode {
+	if config.IsDevMode() {
 		browser.Trace(true)
 		browser.SlowMotion(time.Second)
 	}

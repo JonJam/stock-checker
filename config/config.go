@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// TODO test this works
 func init() {
 	// Setup
 	viper.SetConfigName("config")
@@ -37,20 +36,22 @@ func IsDevMode() bool {
 	return viper.GetBool(key)
 }
 
-// TODO Implement scheduler config
+func GetSchedulerConfig() SchedulerConfig {
+	const key = "scheduler"
+
+	c := SchedulerConfig{}
+
+	unmarshalComplexConfig(key, &c)
+
+	return c
+}
 
 func GetTwilioConfig() TwilioConfig {
 	const key = "twilio"
 
 	c := TwilioConfig{}
 
-	if !viper.IsSet(key) {
-		panic(fmt.Errorf("Configuration key %s not set", key))
-	}
-
-	if err := viper.UnmarshalKey(key, &c); err != nil {
-		panic(fmt.Errorf("Unable to decode configuration with key %s: %s", key, err))
-	}
+	unmarshalComplexConfig(key, &c)
 
 	return c
 }
@@ -60,13 +61,17 @@ func GetRodConfig() RodConfig {
 
 	c := RodConfig{}
 
+	unmarshalComplexConfig(key, &c)
+
+	return c
+}
+
+func unmarshalComplexConfig(key string, c interface{}) {
 	if !viper.IsSet(key) {
 		panic(fmt.Errorf("Configuration key %s not set", key))
 	}
 
-	if err := viper.UnmarshalKey(key, &c); err != nil {
+	if err := viper.UnmarshalKey(key, c); err != nil {
 		panic(fmt.Errorf("Unable to decode configuration with key %s: %s", key, err))
 	}
-
-	return c
 }

@@ -5,7 +5,7 @@ type RodConfig struct {
 }
 
 type SchedulerConfig struct {
-	Interval int
+	Interval uint64
 }
 
 type TwilioConfig struct {

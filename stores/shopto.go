@@ -21,7 +21,7 @@ func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 	defer releasePage(page)
 
 	// Product details page
-	if err := page.Navigate("https://www.shopto.net/en/xbxhw01-xbox-series-x-p191471/?utm_source=website&utm_medium=banner&utm_campaign=Xbox%20Series%20X"); err != nil {
+	if err := page.Navigate("https://www.shopto.net/en/swhw33-nintendo-switch-1-1-neon-red-neon-blue-p113520/"); err != nil {
 		util.Logger.Println(err)
 
 		return StockCheckResult{
@@ -39,7 +39,7 @@ func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 	}
 
 	// Setting Sleeper to nil to not retry
-	if _, err := page.Sleeper(nil).ElementR("h1", "404"); err == nil {
+	if _, err := page.Sleeper(nil).ElementR("button", "REGISTER NOW"); err == nil {
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    OutOfStock,
