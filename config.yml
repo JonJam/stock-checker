@@ -1,4 +1,4 @@
-developmentMode: true
+developmentMode: false
 
 scheduler:
   interval: 1
