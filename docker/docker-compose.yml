@@ -3,5 +3,8 @@ version: "3.9"
 services:
   app:
     build: ./..
-    environment:
-      - SC_DEVELOPMENTMODE=false
+    container_name: stock-checker-$USER
+
+    # environment:
+    #   - SC_
+      # TODO Enable rod.trace in docker-compose

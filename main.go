@@ -28,23 +28,20 @@ func task() {
 	util.Logger.Println("Starting task")
 
 	stores := []stores.Store{
-		stores.Argos{},
-		stores.Amazon{},
-		stores.Currys{},
-		stores.Game{},
+		// stores.Argos{},
+		// stores.Amazon{},
+		// stores.Currys{},
+		// stores.Game{},
+		// TODO workout why this fails in headless mode
 		stores.JohnLewis{},
-		stores.ShopTo{},
-		stores.Smyths{},
+		// stores.ShopTo{},
+		// stores.Smyths{},
 	}
 
 	results := services.CheckStores(stores)
 
-	if config.IsDevMode() {
-		util.Logger.Println(results)
-	} else {
-		// TODO Only notify if one is true
-		services.Notify(results)
-	}
+	// TODO Only notify if one is true
+	services.Notify(results)
 
 	util.Logger.Println("Task complete")
 }

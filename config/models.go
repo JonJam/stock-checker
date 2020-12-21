@@ -1,7 +1,11 @@
 package config
 
 type RodConfig struct {
+	DevTools     bool
+	Headless     bool
 	PagePoolSize int
+	SlowMotion   bool
+	Trace        bool
 }
 
 type SchedulerConfig struct {
@@ -9,6 +13,7 @@ type SchedulerConfig struct {
 }
 
 type TwilioConfig struct {
+	Enabled    bool
 	AccountSid string
 	AuthToken  string
 	NumberTo   string

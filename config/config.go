@@ -26,16 +26,6 @@ func init() {
 	}
 }
 
-func IsDevMode() bool {
-	const key = "developmentMode"
-
-	if !viper.IsSet(key) {
-		panic(fmt.Errorf("Configuration key %s not set", key))
-	}
-
-	return viper.GetBool(key)
-}
-
 func GetSchedulerConfig() SchedulerConfig {
 	const key = "scheduler"
 
