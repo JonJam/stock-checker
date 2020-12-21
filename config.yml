@@ -5,8 +5,8 @@ rod:
   devTools: false
   headless: true
   pagePoolSize: 3
-  slowMotion: false
-  trace: false
+  slowMotion: true
+  trace: true
 
 twilio:
   enabled: false

@@ -12,6 +12,17 @@
             "program": "${fileDirname}",
             "env": {},
             "args": []
+        },
+        {
+            "name": "Connect to server",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "cwd": "${workspaceFolder}",
+            "port": 40000,
+            "host": "127.0.0.1",
+            // "cwd": ".",
+            "remotePath": "/"
         }
     ]
 }
