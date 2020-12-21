@@ -77,7 +77,7 @@ func createBrowser(url string) (*rod.Browser, error) {
 	browser.Trace(config.GetRodConfig().Trace)
 
 	if config.GetRodConfig().SlowMotion {
-		browser.SlowMotion(time.Second * 10)
+		browser.SlowMotion(time.Second)
 	}
 
 	err := browser.Connect()

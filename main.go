@@ -27,21 +27,33 @@ func main() {
 func task() {
 	util.Logger.Println("Starting task")
 
-	stores := []stores.Store{
-		// stores.Argos{},
-		// stores.Amazon{},
-		// stores.Currys{},
-		// stores.Game{},
-		// TODO workout why this fails in headless mode
-		stores.JohnLewis{},
-		// stores.ShopTo{},
-		// stores.Smyths{},
+	s := []stores.Store{
+		stores.Argos{},
+		stores.Amazon{},
+		stores.Currys{},
+		stores.Game{},
+		// TODO John Lewis doesn't work in headless mode
+		// stores.JohnLewis{},
+		stores.ShopTo{},
+		stores.Smyths{},
 	}
 
-	results := services.CheckStores(stores)
+	results := services.CheckStores(s)
 
-	// TODO Only notify if one is true
-	services.Notify(results)
+	hasStock := false
+
+	for _, v := range results {
+		if v.Status == stores.InStock {
+			hasStock = true
+			break
+		}
+	}
+
+	if hasStock {
+		services.Notify(results)
+	} else {
+		util.Logger.Println(results)
+	}
 
 	util.Logger.Println("Task complete")
 }

@@ -18,7 +18,6 @@ func Notify(results []stores.StockCheckResult) {
 	c := config.GetTwilioConfig()
 
 	if !c.Enabled {
-		util.Logger.Println(results)
 		return
 	}
 

@@ -157,23 +157,36 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 		}
 	}
 
-	// Setting Sleeper to nil to not retry
-	if _, err = page.Sleeper(nil).Element("#button--add-to-basket-out-of-stock"); err == nil {
-		return StockCheckResult{
-			StoreName: storeName,
-			Status:    OutOfStock,
-		}
-	} else if err.Error() == "cannot find element" {
-		return StockCheckResult{
-			StoreName: storeName,
-			Status:    InStock,
-		}
-	} else {
+	addToBasketButton, err := page.Element("div.add-to-basket-summary-and-cta > button")
+	if err != nil {
 		util.Logger.Println(err)
 
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
+	}
+
+	addToBasketButtonText, err := addToBasketButton.Text()
+
+	if err != nil {
+		util.Logger.Println(err)
+
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    Unknown,
+		}
+	}
+
+	if addToBasketButtonText == "Out of stock" {
+		return StockCheckResult{
+			StoreName: storeName,
+			Status:    OutOfStock,
+		}
+	}
+
+	return StockCheckResult{
+		StoreName: storeName,
+		Status:    InStock,
 	}
 }
