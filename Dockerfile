@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
 # Dev runner
 FROM base-runner AS dev-runner
 WORKDIR /server
-COPY config.yml /server
+COPY config.env /server
 COPY --from=builder /src/app-dev /server/app
 COPY --from=builder /go/bin/dlv /server
 EXPOSE 40000
@@ -30,6 +30,6 @@ CMD ["/server/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--
 # Prod runner
 FROM base-runner AS prod-runner
 WORKDIR /server
-COPY config.yml /server
+COPY config.env /server
 COPY --from=builder /src/app /server
 CMD ["./app"]

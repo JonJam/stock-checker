@@ -17,5 +17,5 @@ services:
       - "40000:40000" # DEBUG
 
     environment:
-      - SC_ROD.TRACE=true
-      - SC_ROD.PAGEPOOLSIZE=1
+      - SC_ROD_TRACE=true
+      - SC_ROD_PAGEPOOLSIZE=1

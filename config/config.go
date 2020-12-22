@@ -1,3 +1,5 @@
+// Using envfile and not YAML due to https://github.com/spf13/viper/issues/1029 so can't remove using . in environment variables which DigitalOcean doesn't support.
+// The config methods below don't use viper.UnmarshalKey as it doesn't merge in environment variables due to https://github.com/spf13/viper/issues/1012
 package config
 
 import (
@@ -9,7 +11,7 @@ import (
 func init() {
 	// Setup
 	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
+	viper.SetConfigType("env")
 
 	// Configure directories to look for config
 	viper.AddConfigPath(".")
@@ -26,11 +28,8 @@ func init() {
 	}
 }
 
-// The config methods below don't use viper.UnmarshalKey as it doesn't merge in environment variables due to
-// https://github.com/spf13/viper/issues/1012
-
 func GetSchedulerConfig() SchedulerConfig {
-	const intervalKey = "scheduler.interval"
+	const intervalKey = "SCHEDULER_INTERVAL"
 
 	keys := []string{
 		intervalKey,
@@ -44,11 +43,11 @@ func GetSchedulerConfig() SchedulerConfig {
 }
 
 func GetTwilioConfig() TwilioConfig {
-	const enabledKey = "twilio.enabled"
-	const accountSidKey = "twilio.accountSid"
-	const authTokenKey = "twilio.authToken"
-	const numberToKey = "twilio.numberTo"
-	const numberFromKey = "twilio.numberFrom"
+	const enabledKey = "TWILIO_ENABLED"
+	const accountSidKey = "TWILIO_ACCOUNTSID"
+	const authTokenKey = "TWILIO_AUTHTOKEN"
+	const numberToKey = "TWILIO_NUMBERTO"
+	const numberFromKey = "TWILIO_NUMBERFROM"
 
 	keys := []string{
 		enabledKey,
@@ -70,11 +69,11 @@ func GetTwilioConfig() TwilioConfig {
 }
 
 func GetRodConfig() RodConfig {
-	const devToolsKey = "rod.devTools"
-	const headlessKey = "rod.headless"
-	const pagePoolSizeKey = "rod.pagePoolSize"
-	const slowMotionKey = "rod.slowMotion"
-	const traceKey = "rod.trace"
+	const devToolsKey = "ROD_DEVTOOLS"
+	const headlessKey = "ROD_HEADLESS"
+	const pagePoolSizeKey = "ROD_PAGEPOOLSIZE"
+	const slowMotionKey = "ROD_SLOWMOTION"
+	const traceKey = "ROD_TRACE"
 
 	keys := []string{
 		devToolsKey,
