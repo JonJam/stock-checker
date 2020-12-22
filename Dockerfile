@@ -27,8 +27,8 @@ RUN apt-get update && apt-get install -y \
 
 
 # Dev runner
-FROM dev-builder AS dev-runner
-# COPY --from=dev-builder /src /
+FROM base-runner AS dev-runner
+COPY --from=dev-builder /src /src
 COPY --from=dev-builder /go/bin/dlv /src
 EXPOSE 40000
 WORKDIR /src
