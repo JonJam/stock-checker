@@ -23,7 +23,7 @@
             "cwd": "${workspaceFolder}",
             "port": 40000,
             "host": "127.0.0.1",
-            // "remotePath": "/"
+            "remotePath": "/src"
         },
         // Other snippets from: https://github.com/golang/vscode-go/blob/master/docs/debugging.md#snippets
         {
