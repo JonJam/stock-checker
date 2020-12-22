@@ -8,6 +8,8 @@ services:
     # Enabling security_opt as advised here: https://github.com/golang/vscode-go/blob/master/docs/debugging.md#linuxdocker
     security_opt:
       - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
     container_name: stock-checker-$USER
 
     ports:

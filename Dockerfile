@@ -28,10 +28,11 @@ RUN apt-get update && apt-get install -y \
 
 # Dev runner
 FROM base-runner AS dev-runner
-COPY --from=dev-builder /src /server
-COPY --from=dev-builder /go/bin/dlv /server
+WORKDIR /
+COPY --from=dev-builder /src /
+COPY --from=dev-builder /go/bin/dlv /
 EXPOSE 40000
-CMD ["server/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "server/app"]
+CMD ["/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/app"]
 
 
 # Prod runner
