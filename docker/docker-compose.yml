@@ -18,4 +18,4 @@ services:
 
     environment:
       - SC_ROD.TRACE=true
-      # TODO Enable rod.trace in docker-compose
+      - SC_ROD.PAGEPOOLSIZE=1
