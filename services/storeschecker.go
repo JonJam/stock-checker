@@ -63,7 +63,7 @@ func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 }
 
 func createControlURL() (string, error) {
-	launcher := launcher.New()
+	launcher := launcher.New().Set("--no-sandbox")
 
 	launcher.Devtools(config.GetRodConfig().DevTools)
 	launcher.Headless(config.GetRodConfig().Headless)
