@@ -1,6 +1,6 @@
 # Builder
 FROM golang:1.15.6-buster AS base-builder
-ADD . /src
+COPY . /src
 WORKDIR /src
 
 
@@ -28,17 +28,17 @@ RUN apt-get update && apt-get install -y \
 
 # Dev runner
 FROM base-runner AS dev-runner
-COPY --from=dev-builder /src /src
-COPY --from=dev-builder /go/bin/dlv /src
+WORKDIR /server
+COPY config.yml /server
+COPY --from=dev-builder /src/app /server
+COPY --from=dev-builder /go/bin/dlv /server
 EXPOSE 40000
-WORKDIR /src
-CMD ["/src/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/src/app"]
+CMD ["/server/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/server/app"]
 
 
-# TODO Fix this
 # Prod runner
 FROM base-runner AS prod-runner
-COPY --from=prod-builder /src/app /server
-COPY config.yml /server
 WORKDIR /server
+COPY config.yml /server
+COPY --from=prod-builder /src/app /server
 CMD ["./app"]

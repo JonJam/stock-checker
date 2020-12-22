@@ -2,7 +2,9 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/jonjam/stock-checker/util"
 	"github.com/spf13/viper"
 )
 
@@ -17,6 +19,7 @@ func init() {
 	// Configure environment variables
 	viper.SetEnvPrefix("sc")
 	viper.AutomaticEnv()
+	viper.EnvKeyReplacer(strings.NewReplacer("_", "."))
 
 	// Load configuration file
 	err := viper.ReadInConfig()
@@ -24,6 +27,12 @@ func init() {
 	if err != nil {
 		panic(fmt.Errorf("Could not read config file: %s", err))
 	}
+
+	// TODO Remove - double check still works or does without replacer
+	t := viper.AllSettings()
+	u := viper.Get("rod.trace")
+	util.Logger.Println(t)
+	util.Logger.Println(u)
 }
 
 func GetSchedulerConfig() SchedulerConfig {

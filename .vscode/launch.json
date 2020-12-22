@@ -13,8 +13,6 @@
             "env": {},
             "args": []
         },
-        // TODO Work out why this is not working now
-        // TODO Refactor dockerfile back to what was
         {
             "name": "Launch and debug in Docker",
             "type": "go",
@@ -23,6 +21,7 @@
             "cwd": "${workspaceFolder}",
             "port": 40000,
             "host": "127.0.0.1",
+            // This corresponds to the directory the app is built in
             "remotePath": "/src"
         },
         // Other snippets from: https://github.com/golang/vscode-go/blob/master/docs/debugging.md#snippets
