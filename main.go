@@ -27,23 +27,32 @@ func main() {
 func task() {
 	util.Logger.Println("Starting task")
 
-	stores := []stores.Store{
+	s := []stores.Store{
 		stores.Argos{},
 		stores.Amazon{},
 		stores.Currys{},
 		stores.Game{},
-		stores.JohnLewis{},
+		// TODO John Lewis doesn't work in headless mode
+		// stores.JohnLewis{},
 		stores.ShopTo{},
 		stores.Smyths{},
 	}
 
-	results := services.CheckStores(stores)
+	results := services.CheckStores(s)
 
-	if config.IsDevMode() {
-		util.Logger.Println(results)
-	} else {
-		// TODO Only notify if one is true
+	hasStock := false
+
+	for _, v := range results {
+		if v.Status == stores.InStock {
+			hasStock = true
+			break
+		}
+	}
+
+	if hasStock {
 		services.Notify(results)
+	} else {
+		util.Logger.Println(results)
 	}
 
 	util.Logger.Println("Task complete")

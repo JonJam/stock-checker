@@ -26,52 +26,79 @@ func init() {
 	}
 }
 
-func IsDevMode() bool {
-	const key = "developmentMode"
-
-	if !viper.IsSet(key) {
-		panic(fmt.Errorf("Configuration key %s not set", key))
-	}
-
-	return viper.GetBool(key)
-}
+// The config methods below don't use viper.UnmarshalKey as it doesn't merge in environment variables due to
+// https://github.com/spf13/viper/issues/1012
 
 func GetSchedulerConfig() SchedulerConfig {
-	const key = "scheduler"
+	const intervalKey = "scheduler.interval"
 
-	c := SchedulerConfig{}
+	keys := []string{
+		intervalKey,
+	}
 
-	unmarshalComplexConfig(key, &c)
+	checkKeysExist(keys)
 
-	return c
+	return SchedulerConfig{
+		Interval: viper.GetUint64(intervalKey),
+	}
 }
 
 func GetTwilioConfig() TwilioConfig {
-	const key = "twilio"
+	const enabledKey = "twilio.enabled"
+	const accountSidKey = "twilio.accountSid"
+	const authTokenKey = "twilio.authToken"
+	const numberToKey = "twilio.numberTo"
+	const numberFromKey = "twilio.numberFrom"
 
-	c := TwilioConfig{}
+	keys := []string{
+		enabledKey,
+		accountSidKey,
+		authTokenKey,
+		numberToKey,
+		numberFromKey,
+	}
 
-	unmarshalComplexConfig(key, &c)
+	checkKeysExist(keys)
 
-	return c
+	return TwilioConfig{
+		Enabled:    viper.GetBool(enabledKey),
+		AccountSid: viper.GetString(accountSidKey),
+		AuthToken:  viper.GetString(authTokenKey),
+		NumberTo:   viper.GetString(numberToKey),
+		NumberFrom: viper.GetString(numberFromKey),
+	}
 }
 
 func GetRodConfig() RodConfig {
-	const key = "rod"
+	const devToolsKey = "rod.devTools"
+	const headlessKey = "rod.headless"
+	const pagePoolSizeKey = "rod.pagePoolSize"
+	const slowMotionKey = "rod.slowMotion"
+	const traceKey = "rod.trace"
 
-	c := RodConfig{}
-
-	unmarshalComplexConfig(key, &c)
-
-	return c
-}
-
-func unmarshalComplexConfig(key string, c interface{}) {
-	if !viper.IsSet(key) {
-		panic(fmt.Errorf("Configuration key %s not set", key))
+	keys := []string{
+		devToolsKey,
+		headlessKey,
+		pagePoolSizeKey,
+		slowMotionKey,
+		traceKey,
 	}
 
-	if err := viper.UnmarshalKey(key, c); err != nil {
-		panic(fmt.Errorf("Unable to decode configuration with key %s: %s", key, err))
+	checkKeysExist(keys)
+
+	return RodConfig{
+		DevTools:     viper.GetBool(devToolsKey),
+		Headless:     viper.GetBool(headlessKey),
+		PagePoolSize: viper.GetInt(pagePoolSizeKey),
+		SlowMotion:   viper.GetBool(slowMotionKey),
+		Trace:        viper.GetBool(traceKey),
+	}
+}
+
+func checkKeysExist(keys []string) {
+	for _, k := range keys {
+		if !viper.IsSet(k) {
+			panic(fmt.Errorf("Configuration key %s not set", k))
+		}
 	}
 }

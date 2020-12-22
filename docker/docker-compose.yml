@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./..
+      target: dev-runner 
+    # Enabling security_opt as advised here: https://github.com/golang/vscode-go/blob/master/docs/debugging.md#linuxdocker
+    security_opt:
+      - seccomp:unconfined
+    # Added following: https://blog.jetbrains.com/go/2020/05/06/debugging-a-go-application-inside-a-docker-container/
+    cap_add:
+      - SYS_PTRACE
+    container_name: stock-checker-$USER
+
+    ports:
+      - "40000:40000" # DEBUG
+
+    environment:
+      - SC_ROD.TRACE=true
+      - SC_ROD.PAGEPOOLSIZE=1

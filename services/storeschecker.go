@@ -65,10 +65,8 @@ func CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 func createControlURL() (string, error) {
 	launcher := launcher.New()
 
-	if config.IsDevMode() {
-		launcher.Devtools(true)
-		launcher.Headless(false)
-	}
+	launcher.Devtools(config.GetRodConfig().DevTools)
+	launcher.Headless(config.GetRodConfig().Headless)
 
 	return launcher.Launch()
 }
@@ -76,8 +74,9 @@ func createControlURL() (string, error) {
 func createBrowser(url string) (*rod.Browser, error) {
 	browser := rod.New().ControlURL(url)
 
-	if config.IsDevMode() {
-		browser.Trace(true)
+	browser.Trace(config.GetRodConfig().Trace)
+
+	if config.GetRodConfig().SlowMotion {
 		browser.SlowMotion(time.Second)
 	}
 

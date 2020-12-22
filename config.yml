@@ -1,12 +1,15 @@
-developmentMode: true
-
 scheduler:
   interval: 1
 
 rod:
+  devTools: false
+  headless: true
   pagePoolSize: 3
+  slowMotion: false
+  trace: false
 
 twilio:
+  enabled: false
   accountSid: ""
   authToken: ""
   numberTo: ""

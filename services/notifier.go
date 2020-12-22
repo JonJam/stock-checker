@@ -15,6 +15,12 @@ import (
 
 // Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
 func Notify(results []stores.StockCheckResult) {
+	c := config.GetTwilioConfig()
+
+	if !c.Enabled {
+		return
+	}
+
 	body := "Stock checker results:\n"
 
 	sort.Slice(results, func(i, j int) bool {
@@ -25,13 +31,11 @@ func Notify(results []stores.StockCheckResult) {
 		body = fmt.Sprintf(body+"%v\n", v)
 	}
 
-	config := config.GetTwilioConfig()
-
-	requestURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", config.AccountSid)
+	requestURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", c.AccountSid)
 
 	msgData := url.Values{}
-	msgData.Set("To", config.NumberTo)
-	msgData.Set("From", config.NumberFrom)
+	msgData.Set("To", c.NumberTo)
+	msgData.Set("From", c.NumberFrom)
 	msgData.Set("Body", body)
 	msgDataReader := *strings.NewReader(msgData.Encode())
 
@@ -43,7 +47,7 @@ func Notify(results []stores.StockCheckResult) {
 		return
 	}
 
-	req.SetBasicAuth(config.AccountSid, config.AuthToken)
+	req.SetBasicAuth(c.AccountSid, c.AuthToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 

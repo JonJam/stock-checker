@@ -1,0 +1,9 @@
+*
+!config
+!services
+!stores
+!util
+!config.yml
+!go.mod
+!go.sum
+!main.go
