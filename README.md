@@ -9,8 +9,3 @@ Inspired by [How To Get a PlayStation 5 When It's Always Out of Stock](https://d
 This app periodically checks various retailers in the United Kingdom to see if they have an Xbox Series X console in stock. 
 
 If any have stock, it will send an SMS via Twilio detailing the results.
-
-## Deploy to DigitalOcean
-Before deploying to DigitalOcean, you will need a Twilio account which you can sign up for [here](https://www.twilio.com/try-twilio)
-
-[![Deploy to DO](https://mp-assets1.sfo2.digitaloceanspaces.com/deploy-to-do/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/jonjam/stock-checker/tree/main&refcode=42f789a7eea4)
