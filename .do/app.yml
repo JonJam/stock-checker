@@ -10,3 +10,23 @@ workers:
   dockerfile_path: Dockerfile
   instance_count: 1
   instance_size_slug: basic-xs
+  envs:
+  - key: SC_TWILIO_ENABLED
+    scope: RUN_AND_BUILD_TIME
+    value: "true"
+  - key: SC_TWILIO_ACCOUNTSID
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: ""
+  - key: SC_TWILIO_AUTHTOKEN
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: ""
+  - key: SC_TWILIO_NUMBERTO
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: ""
+  - key: SC_TWILIO_NUMBERFROM
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+    value: ""
