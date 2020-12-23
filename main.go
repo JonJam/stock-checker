@@ -40,20 +40,20 @@ func task() {
 
 	results := services.CheckStores(s)
 
-	hasStock := false
+	// hasStock := false
 
-	for _, v := range results {
-		if v.Status == stores.InStock {
-			hasStock = true
-			break
-		}
-	}
+	// for _, v := range results {
+	// 	if v.Status == stores.InStock {
+	// 		hasStock = true
+	// 		break
+	// 	}
+	// }
 
-	if hasStock {
-		services.Notify(results)
-	} else {
-		util.Logger.Println(results)
-	}
+	// if hasStock {
+	services.Notify(results)
+	// } else {
+	// 	util.Logger.Println(results)
+	// }
 
 	util.Logger.Println("Task complete")
 }

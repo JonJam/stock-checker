@@ -8,6 +8,5 @@ workers:
     deploy_on_push: true
     repo: JonJam/stock-checker
   dockerfile_path: Dockerfile
-
-  # TODO Env vars ?
-    # TODO Why doesn't run on Digital ocean
+  instance_count: 1
+  instance_size_slug: basic-xs
