@@ -31,7 +31,8 @@ func task() {
 		stores.Argos{},
 		stores.Amazon{},
 		stores.Currys{},
-		stores.Game{},
+		// TODO Re-enable Game once add timeout
+		// stores.Game{},
 		// TODO John Lewis doesn't work in headless mode
 		// stores.JohnLewis{},
 		stores.ShopTo{},
