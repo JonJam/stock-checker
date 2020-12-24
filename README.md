@@ -8,4 +8,4 @@ Inspired by [How To Get a PlayStation 5 When It's Always Out of Stock](https://d
 
 This app periodically checks various retailers in the United Kingdom to see if they have an Xbox Series X console in stock. 
 
-If any have stock, it will send an SMS via Twilio detailing the results.
+If any have stock, it will send a SMS via Twilio detailing the results.
