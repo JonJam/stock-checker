@@ -13,8 +13,6 @@ import (
 )
 
 func main() {
-	// TODO Config to use dev vs prod
-
 	var logger *zap.Logger
 
 	if config.GetLogConfig().Development {
