@@ -6,30 +6,45 @@ import (
 	"github.com/jonjam/stock-checker/config"
 	"github.com/jonjam/stock-checker/services"
 	"github.com/jonjam/stock-checker/stores"
-	"github.com/jonjam/stock-checker/util"
 
 	"github.com/go-co-op/gocron"
+
+	"go.uber.org/zap"
 )
 
 func main() {
+	// TODO Config to use dev vs prod
+
+	var logger *zap.Logger
+
+	if config.GetLogConfig().Development {
+		logger, _ = zap.NewDevelopment()
+	} else {
+		logger, _ = zap.NewProduction()
+	}
+
+	defer logger.Sync()
+
 	s := gocron.NewScheduler(time.UTC)
 
 	i := config.GetSchedulerConfig().Interval
-	_, err := s.Every(i).Hour().Do(task)
+	_, err := s.Every(i).Hour().Do(func() {
+		checkStores(logger)
+	})
 
 	if err != nil {
-		util.Logger.Fatalln(err)
+		logger.Fatal("Failed to create job.", zap.Error(err))
 	}
 
 	s.StartBlocking()
 }
 
-func task() {
-	util.Logger.Println("Starting task")
+func checkStores(logger *zap.Logger) {
+	logger.Info("Starting task.")
 
 	s := []stores.Store{
-		stores.Argos{},
-		stores.Amazon{},
+		stores.NewArgos(logger),
+		stores.NewAmazon(logger),
 		stores.Currys{},
 		// TODO Re-enable Game once add timeout
 		// stores.Game{},
@@ -39,7 +54,8 @@ func task() {
 		stores.Smyths{},
 	}
 
-	results := services.CheckStores(s)
+	c := services.NewStoresChecker(logger)
+	results := c.CheckStores(s)
 
 	hasStock := false
 
@@ -51,10 +67,9 @@ func task() {
 	}
 
 	if hasStock {
-		services.Notify(results)
-	} else {
-		util.Logger.Println(results)
+		n := services.NewNotifier(logger)
+		n.Notify(results)
 	}
 
-	util.Logger.Println("Task complete")
+	logger.Info("Task complete.", zap.Any("results", results))
 }

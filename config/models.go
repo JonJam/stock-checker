@@ -1,5 +1,9 @@
 package config
 
+type LogConfig struct {
+	Development bool
+}
+
 type RodConfig struct {
 	DevTools     bool
 	Headless     bool

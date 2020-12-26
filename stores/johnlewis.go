@@ -3,10 +3,17 @@ package stores
 import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
 type JohnLewis struct {
+	logger *zap.Logger
+}
+
+func NewJohnLewis(l *zap.Logger) JohnLewis {
+	return JohnLewis{
+		logger: l,
+	}
 }
 
 func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
@@ -23,7 +30,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	// Home page
 	if err := page.Navigate("https://www.johnlewis.com/"); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to load to home page.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -31,7 +38,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to wait for home page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -42,7 +49,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	// Cookie banner
 	cookieBannerSubmit, err := page.Element(`button[data-test="allow-all"]`)
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find cookie banner accept button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -51,7 +58,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	}
 
 	if err = cookieBannerSubmit.Click(proto.InputMouseButtonLeft); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to click cookie banner accept button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -62,7 +69,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	// Search
 	searchInput, err := page.Element("#desktopSearch")
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find search input.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -71,7 +78,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	}
 
 	if err = searchInput.Input("xbox series x console"); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to enter search term.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -81,7 +88,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	searchButton, err := searchInput.Next()
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find search button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -90,7 +97,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	}
 
 	if err = searchButton.Click(proto.InputMouseButtonLeft); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to click on search button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -100,7 +107,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	// Search results page (https://www.johnlewis.com/search)
 	if err = page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to wait for search results page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -110,7 +117,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	productCardTitle, err := page.ElementR("h2", "Microsoft Xbox Series X Console")
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find console title.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -120,7 +127,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	productCardLinkDiv, err := productCardTitle.Parent()
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find console card.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -130,7 +137,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	productCardLink, err := productCardLinkDiv.Parent()
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find console link.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -139,7 +146,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	}
 
 	if err := productCardLink.Click(proto.InputMouseButtonLeft); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to click on console link.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -149,7 +156,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	// Product details page
 	if err = page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to wait for Product details page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -159,7 +166,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 
 	addToBasketButton, err := page.Element("div.add-to-basket-summary-and-cta > button")
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to find add to basket button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -170,7 +177,7 @@ func (j JohnLewis) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) 
 	addToBasketButtonText, err := addToBasketButton.Text()
 
 	if err != nil {
-		util.Logger.Println(err)
+		j.logger.Error("Failed to get add to basket button text.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
