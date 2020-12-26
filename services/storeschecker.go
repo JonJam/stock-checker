@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-rod/bypass"
@@ -89,6 +90,8 @@ func (s StoreChecker) createControlURL() (string, error) {
 func (s StoreChecker) createBrowser(url string) (*rod.Browser, error) {
 	browser := rod.New().ControlURL(url)
 
+	browser.Logger(newCustomRodLogger(s.logger))
+
 	browser.Trace(config.GetRodConfig().Trace)
 
 	if config.GetRodConfig().SlowMotion {
@@ -143,4 +146,20 @@ func (s StoreChecker) createCreatePageFunc(browser *rod.Browser) func() *rod.Pag
 
 		return page
 	}
+}
+
+type customRodLogger struct {
+	logger *zap.Logger
+}
+
+func newCustomRodLogger(l *zap.Logger) customRodLogger {
+	return customRodLogger{
+		logger: l,
+	}
+}
+
+func (c customRodLogger) Println(msg ...interface{}) {
+	s := fmt.Sprintln(msg...)
+
+	c.logger.Debug(s)
 }

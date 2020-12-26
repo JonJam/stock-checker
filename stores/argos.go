@@ -17,7 +17,6 @@ func NewArgos(l *zap.Logger) Argos {
 }
 
 func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
-	a.logger.Info("Checking store.")
 	const storeName = "Argos"
 
 	page := getPage()
