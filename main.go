@@ -43,13 +43,13 @@ func checkStores(logger *zap.Logger) {
 	s := []stores.Store{
 		stores.NewArgos(logger),
 		stores.NewAmazon(logger),
-		stores.Currys{},
+		stores.NewCurrys(logger),
 		// TODO Re-enable Game once add timeout
-		// stores.Game{},
+		// stores.NewGame(logger),
 		// TODO John Lewis doesn't work in headless mode
-		// stores.JohnLewis{},
-		stores.ShopTo{},
-		stores.Smyths{},
+		// stores.NewJohnLewis(logger),
+		stores.NewShopTo(logger),
+		stores.NewSmyths(logger),
 	}
 
 	c := services.NewStoresChecker(logger)

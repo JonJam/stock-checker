@@ -10,6 +10,12 @@ type Smyths struct {
 	logger *zap.Logger
 }
 
+func NewSmyths(l *zap.Logger) Smyths {
+	return Smyths{
+		logger: l,
+	}
+}
+
 func (s Smyths) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
 	const storeName = "Smyths"
 
