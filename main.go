@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/jonjam/stock-checker/config"
@@ -14,24 +15,37 @@ import (
 
 func main() {
 	var logger *zap.Logger
+	var err error
 
 	if config.GetLogConfig().Development {
-		logger, _ = zap.NewDevelopment()
+		logger, err = zap.NewDevelopment()
 	} else {
-		logger, _ = zap.NewProduction()
+		logger, err = zap.NewProduction()
 	}
 
-	defer logger.Sync()
+	if err != nil {
+		log.Fatalf("Could not create logger: %s.\n", err)
+		return
+	}
+
+	defer func() {
+		err := logger.Sync()
+
+		if err != nil {
+			logger.Error("Failed to flush logs.", zap.Error(err))
+		}
+	}()
 
 	s := gocron.NewScheduler(time.UTC)
 
 	i := config.GetSchedulerConfig().Interval
-	_, err := s.Every(i).Hour().Do(func() {
+	_, err = s.Every(i).Hour().Do(func() {
 		checkStores(logger)
 	})
 
 	if err != nil {
 		logger.Fatal("Failed to create job.", zap.Error(err))
+		return
 	}
 
 	s.StartBlocking()

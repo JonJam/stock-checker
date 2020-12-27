@@ -13,17 +13,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type StoreChecker struct {
+type StoresChecker struct {
 	logger *zap.Logger
 }
 
-func NewStoresChecker(l *zap.Logger) StoreChecker {
-	return StoreChecker{
+func NewStoresChecker(l *zap.Logger) StoresChecker {
+	return StoresChecker{
 		logger: l,
 	}
 }
 
-func (s StoreChecker) CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
+func (s StoresChecker) CheckStores(storesSlice []stores.Store) []stores.StockCheckResult {
 	url, err := s.createControlURL()
 
 	if err != nil {
@@ -78,7 +78,7 @@ func (s StoreChecker) CheckStores(storesSlice []stores.Store) []stores.StockChec
 	return results
 }
 
-func (s StoreChecker) createControlURL() (string, error) {
+func (s StoresChecker) createControlURL() (string, error) {
 	launcher := launcher.New().Set("--no-sandbox")
 
 	launcher.Devtools(config.GetRodConfig().DevTools)
@@ -87,7 +87,7 @@ func (s StoreChecker) createControlURL() (string, error) {
 	return launcher.Launch()
 }
 
-func (s StoreChecker) createBrowser(url string) (*rod.Browser, error) {
+func (s StoresChecker) createBrowser(url string) (*rod.Browser, error) {
 	browser := rod.New().ControlURL(url)
 
 	browser.Logger(newCustomRodLogger(s.logger))
@@ -107,7 +107,7 @@ func (s StoreChecker) createBrowser(url string) (*rod.Browser, error) {
 	return browser, nil
 }
 
-func (s StoreChecker) createGetPageFunc(browser *rod.Browser, pool rod.PagePool) func() *rod.Page {
+func (s StoresChecker) createGetPageFunc(browser *rod.Browser, pool rod.PagePool) func() *rod.Page {
 	create := s.createCreatePageFunc(browser)
 
 	// Gets a page from the pool and configures a timeout for store to perform all operations with it
@@ -117,14 +117,14 @@ func (s StoreChecker) createGetPageFunc(browser *rod.Browser, pool rod.PagePool)
 	}
 }
 
-func (s StoreChecker) createReleasePageFunc(pool rod.PagePool) func(*rod.Page) {
+func (s StoresChecker) createReleasePageFunc(pool rod.PagePool) func(*rod.Page) {
 	return func(page *rod.Page) {
 		// TODO Implement cancel timeout
 		pool.Put(page)
 	}
 }
 
-func (s StoreChecker) createCreatePageFunc(browser *rod.Browser) func() *rod.Page {
+func (s StoresChecker) createCreatePageFunc(browser *rod.Browser) func() *rod.Page {
 	// This func will create a new configured page will be contained within a different incognito browser window.
 	// It returns nil when an error occurs rather than exposing error due to https://pkg.go.dev/github.com/go-rod/rod#PagePool.Get
 	return func() *rod.Page {
