@@ -1,7 +1,19 @@
 package config
 
+type Config interface {
+	GetLogConfig() LogConfig
+	GetNotifierConfig() NotifierConfig
+	GetRodConfig() RodConfig
+	GetSchedulerConfig() SchedulerConfig
+	GetTwilioConfig() TwilioConfig
+}
+
 type LogConfig struct {
 	Development bool
+}
+
+type NotifierConfig struct {
+	Enabled bool
 }
 
 type RodConfig struct {
@@ -17,7 +29,6 @@ type SchedulerConfig struct {
 }
 
 type TwilioConfig struct {
-	Enabled    bool
 	AccountSid string
 	AuthToken  string
 	NumberTo   string

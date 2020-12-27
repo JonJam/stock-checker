@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	c := config.New()
+	c := config.NewAppConfig()
 
 	var logger *zap.Logger
 	var err error
@@ -78,7 +78,9 @@ func checkStores(c config.Config, logger *zap.Logger) {
 	}
 
 	if hasStock {
-		n := services.NewNotifier(c, logger)
+		t := services.NewTwilioClient(c)
+		n := services.NewNotifier(c, logger, t)
+
 		n.Notify(results)
 	}
 
