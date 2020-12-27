@@ -20,7 +20,7 @@ func NewTwilioClient(c config.Config) TwilioClient {
 	}
 }
 
-func (c TwilioClient) send(body string) error {
+func (c TwilioClient) Send(body string) error {
 	// Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
 	requestURL := fmt.Sprintf("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", c.config.AccountSid)
 

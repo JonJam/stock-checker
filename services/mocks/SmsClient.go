@@ -9,8 +9,8 @@ type SmsClient struct {
 	mock.Mock
 }
 
-// send provides a mock function with given fields: body
-func (_m *SmsClient) send(body string) error {
+// Send provides a mock function with given fields: body
+func (_m *SmsClient) Send(body string) error {
 	ret := _m.Called(body)
 
 	var r0 error

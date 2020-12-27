@@ -38,7 +38,7 @@ func (n Notifier) Notify(results []stores.StockCheckResult) {
 		body = fmt.Sprintf(body+"%v\n", v)
 	}
 
-	if err := n.smsClient.send(body); err != nil {
+	if err := n.smsClient.Send(body); err != nil {
 		n.logger.Error("Failed to send SMS.", zap.Error(err))
 	}
 }
