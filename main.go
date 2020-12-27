@@ -38,7 +38,7 @@ func main() {
 	s := gocron.NewScheduler(time.UTC)
 
 	i := c.GetSchedulerConfig().Interval
-	_, err = s.Every(i).Hour().Do(func () {
+	_, err = s.Every(i).Hour().Do(func() {
 		checkStores(c, logger)
 	})
 

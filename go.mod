@@ -8,6 +8,7 @@ require (
 	github.com/go-rod/rod v0.84.2
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.4.0
+	github.com/vektra/mockery/v2 v2.4.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 )
