@@ -14,18 +14,20 @@ import (
 )
 
 type Notifier struct {
+	config config.Config
 	logger *zap.Logger
 }
 
-func NewNotifier(l *zap.Logger) Notifier {
+func NewNotifier(c config.Config, l *zap.Logger) Notifier {
 	return Notifier{
+		config: c,
 		logger: l,
 	}
 }
 
 // Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
 func (n Notifier) Notify(results []stores.StockCheckResult) {
-	c := config.GetTwilioConfig()
+	c := n.config.GetTwilioConfig()
 
 	if !c.Enabled {
 		return
