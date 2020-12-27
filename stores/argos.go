@@ -3,10 +3,17 @@ package stores
 import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
 type Argos struct {
+	logger *zap.Logger
+}
+
+func NewArgos(l *zap.Logger) Argos {
+	return Argos{
+		logger: l,
+	}
 }
 
 func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
@@ -23,7 +30,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 
 	// Home (https://www.argos.co.uk/)
 	if err := page.Navigate("https://www.argos.co.uk/"); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to navigate to Argos home page.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -31,7 +38,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to wait for Argos home page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -42,7 +49,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 	// Cookie banner
 	cookieBannerSubmit, err := page.Element("#consent_prompt_submit")
 	if err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to find accept cookies button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -50,7 +57,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 		}
 	}
 	if err = cookieBannerSubmit.Click(proto.InputMouseButtonLeft); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to click accept cookies button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -61,13 +68,15 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 	// Search
 	searchInput, err := page.Element("#searchTerm")
 	if err != nil {
+		a.logger.Error("Failed to find search term input.", zap.Error(err))
+
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
 	if err = searchInput.Input("xbox series x console"); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to input search term.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -77,13 +86,15 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 
 	searchButton, err := page.Element(`button[data-test="search-button"]`)
 	if err != nil {
+		a.logger.Error("Failed to find search button.", zap.Error(err))
+
 		return StockCheckResult{
 			StoreName: storeName,
 			Status:    Unknown,
 		}
 	}
 	if err = searchButton.Click(proto.InputMouseButtonLeft); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to click on search button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -93,7 +104,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 
 	// Search page (https://www.argos.co.uk/search/)
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to wait for Search page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -103,7 +114,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 
 	consoleLink, err := page.ElementR("a", "Xbox Series X 1TB Console")
 	if err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to find console link.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -111,7 +122,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 		}
 	}
 	if err = consoleLink.Click(proto.InputMouseButtonLeft); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to click on console link.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -121,7 +132,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 
 	// Out of stock page (https://www.argos.co.uk/vp/oos/xbox.html)
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to wait for console page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -141,7 +152,7 @@ func (a Argos) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stoc
 			Status:    InStock,
 		}
 	} else {
-		util.Logger.Println(err)
+		a.logger.Error("Error occurred finding title.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,

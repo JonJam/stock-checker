@@ -2,10 +2,17 @@ package stores
 
 import (
 	"github.com/go-rod/rod"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
 type Currys struct {
+	logger *zap.Logger
+}
+
+func NewCurrys(l *zap.Logger) Currys {
+	return Currys{
+		logger: l,
+	}
 }
 
 func (c Currys) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
@@ -22,7 +29,7 @@ func (c Currys) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 
 	// Product details page
 	if err := page.Navigate("https://www.currys.co.uk/gbuk/gaming/console-gaming/consoles/microsoft-xbox-series-x-1-tb-10203371-pdt.html"); err != nil {
-		util.Logger.Println(err)
+		c.logger.Error("Failed to navigate to Product details page", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -30,7 +37,7 @@ func (c Currys) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		c.logger.Error("Failed to wait for Product details page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -50,7 +57,7 @@ func (c Currys) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 			Status:    InStock,
 		}
 	} else {
-		util.Logger.Println(err)
+		c.logger.Error("Error occurred finding stock status list item.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,

@@ -10,11 +10,21 @@ import (
 
 	"github.com/jonjam/stock-checker/config"
 	"github.com/jonjam/stock-checker/stores"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
+type Notifier struct {
+	logger *zap.Logger
+}
+
+func NewNotifier(l *zap.Logger) Notifier {
+	return Notifier{
+		logger: l,
+	}
+}
+
 // Based off: https://www.twilio.com/blog/2017/09/send-text-messages-golang.html
-func Notify(results []stores.StockCheckResult) {
+func (n Notifier) Notify(results []stores.StockCheckResult) {
 	c := config.GetTwilioConfig()
 
 	if !c.Enabled {
@@ -43,7 +53,7 @@ func Notify(results []stores.StockCheckResult) {
 	req, err := http.NewRequest("POST", requestURL, &msgDataReader)
 
 	if err != nil {
-		util.Logger.Println(err)
+		n.logger.Error("Failed to create request.", zap.Error(err))
 		return
 	}
 
@@ -54,12 +64,12 @@ func Notify(results []stores.StockCheckResult) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		util.Logger.Println(err)
+		n.logger.Error("Failed to send request", zap.Error(err))
 		return
 	}
 
 	if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		util.Logger.Println(fmt.Errorf("unexpected status code from Twilio: %v", resp.StatusCode))
+		n.logger.Error("Unexpected status code from Twilio.", zap.Int("statusCode", resp.StatusCode))
 		return
 	}
 
@@ -69,6 +79,6 @@ func Notify(results []stores.StockCheckResult) {
 	err = decoder.Decode(&data)
 
 	if err != nil {
-		util.Logger.Println(err)
+		n.logger.Error("Error in response from Twilio.", zap.Error(err))
 	}
 }

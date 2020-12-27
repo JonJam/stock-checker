@@ -2,10 +2,17 @@ package stores
 
 import (
 	"github.com/go-rod/rod"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
 type Game struct {
+	logger *zap.Logger
+}
+
+func NewGame(l *zap.Logger) Game {
+	return Game{
+		logger: l,
+	}
 }
 
 func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
@@ -22,7 +29,7 @@ func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stock
 
 	// Xbox Series X page (https://www.game.co.uk/xbox-series-x)
 	if err := page.Navigate("https://www.game.co.uk/xbox-series-x"); err != nil {
-		util.Logger.Println(err)
+		g.logger.Error("Failed to load to console page.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -30,7 +37,7 @@ func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stock
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		g.logger.Error("Failed to wait for console page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -40,7 +47,7 @@ func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stock
 
 	consolesSection, err := page.Element("#contentPanelsConsoles")
 	if err != nil {
-		util.Logger.Println(err)
+		g.logger.Error("Failed to find consoles section.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -50,7 +57,7 @@ func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stock
 
 	consoleTitle, err := consolesSection.ElementR("h3", "Series X")
 	if err != nil {
-		util.Logger.Println(err)
+		g.logger.Error("Failed to find console title.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -60,7 +67,7 @@ func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stock
 
 	panelItem, err := consoleTitle.Parent()
 	if err != nil {
-		util.Logger.Println(err)
+		g.logger.Error("Failed to find panel item.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -79,7 +86,7 @@ func (g Game) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Stock
 			Status:    InStock,
 		}
 	} else {
-		util.Logger.Println(err)
+		g.logger.Error("Error occurred finding out of stock link.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,

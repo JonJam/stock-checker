@@ -2,10 +2,17 @@ package stores
 
 import (
 	"github.com/go-rod/rod"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
 type Amazon struct {
+	logger *zap.Logger
+}
+
+func NewAmazon(l *zap.Logger) Amazon {
+	return Amazon{
+		logger: l,
+	}
 }
 
 func (a Amazon) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
@@ -22,7 +29,7 @@ func (a Amazon) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 
 	// Product details page
 	if err := page.Navigate("https://www.amazon.co.uk/Xbox-RRT-00007-Series-X/dp/B08H93GKNJ/ref=sr_1_1"); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to navigate to Product details page.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -30,7 +37,7 @@ func (a Amazon) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		a.logger.Error("Failed to wait for Product details page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -50,7 +57,7 @@ func (a Amazon) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 			Status:    OutOfStock,
 		}
 	} else {
-		util.Logger.Println(err)
+		a.logger.Error("Error occurred finding add to card button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,

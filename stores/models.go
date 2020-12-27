@@ -28,7 +28,7 @@ type StockCheckResult struct {
 }
 
 func (s StockCheckResult) String() string {
-	return fmt.Sprintf("%s: %s", s.StoreName, s.Status.String())
+	return fmt.Sprintf("%s: %s", s.StoreName, s.Status)
 }
 
 type Store interface {

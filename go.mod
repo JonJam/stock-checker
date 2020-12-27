@@ -7,4 +7,6 @@ require (
 	github.com/go-rod/bypass v0.2.4
 	github.com/go-rod/rod v0.84.2
 	github.com/spf13/viper v1.7.1
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.16.0
 )

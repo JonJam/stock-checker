@@ -2,10 +2,17 @@ package stores
 
 import (
 	"github.com/go-rod/rod"
-	"github.com/jonjam/stock-checker/util"
+	"go.uber.org/zap"
 )
 
 type ShopTo struct {
+	logger *zap.Logger
+}
+
+func NewShopTo(l *zap.Logger) ShopTo {
+	return ShopTo{
+		logger: l,
+	}
 }
 
 func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) StockCheckResult {
@@ -22,7 +29,7 @@ func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 
 	// Product details page
 	if err := page.Navigate("https://www.shopto.net/en/xbxhw01-xbox-series-x-p191471/"); err != nil {
-		util.Logger.Println(err)
+		s.logger.Error("Failed to navigate to product details page.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -30,7 +37,7 @@ func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 		}
 	}
 	if err := page.WaitLoad(); err != nil {
-		util.Logger.Println(err)
+		s.logger.Error("Failed to wait for product details page to load.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,
@@ -50,7 +57,7 @@ func (s ShopTo) Check(getPage func() *rod.Page, releasePage func(*rod.Page)) Sto
 			Status:    InStock,
 		}
 	} else {
-		util.Logger.Println(err)
+		s.logger.Error("Error occurred finding register now button.", zap.Error(err))
 
 		return StockCheckResult{
 			StoreName: storeName,

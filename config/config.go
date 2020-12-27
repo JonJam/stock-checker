@@ -3,7 +3,7 @@
 package config
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/viper"
 )
@@ -24,7 +24,21 @@ func init() {
 	err := viper.ReadInConfig()
 
 	if err != nil {
-		panic(fmt.Errorf("Could not read config file: %s", err))
+		log.Fatalf("Could not read config file: %s.\n", err)
+	}
+}
+
+func GetLogConfig() LogConfig {
+	const developmentKey = "LOG_DEVELOPMENT"
+
+	keys := []string{
+		developmentKey,
+	}
+
+	checkKeysExist(keys)
+
+	return LogConfig{
+		Development: viper.GetBool(developmentKey),
 	}
 }
 
@@ -97,7 +111,7 @@ func GetRodConfig() RodConfig {
 func checkKeysExist(keys []string) {
 	for _, k := range keys {
 		if !viper.IsSet(k) {
-			panic(fmt.Errorf("Configuration key %s not set", k))
+			log.Fatalf("Configuration key %s not set.\n", k)
 		}
 	}
 }
