@@ -12,11 +12,12 @@ type Config struct {
 	viper *viper.Viper
 }
 
-func New() Config{
+func New() Config {
 	return newWithViper(viper.GetViper())
 }
 
-func newWithViper(v *viper.Viper) Config{
+// For testing only
+func newWithViper(v *viper.Viper) Config {
 	// Setup
 	v.SetConfigName("config")
 	v.SetConfigType("env")
@@ -35,7 +36,7 @@ func newWithViper(v *viper.Viper) Config{
 		log.Fatalf("Could not read config file: %s.\n", err)
 	}
 
-	return Config {
+	return Config{
 		viper: v,
 	}
 }
