@@ -98,7 +98,7 @@ func (c AppConfig) GetTwilioConfig() TwilioConfig {
 	c.checkKeysExist(keys)
 
 	return TwilioConfig{
-		Url:        c.viper.GetString(urlKey),
+		URL:        c.viper.GetString(urlKey),
 		AccountSid: c.viper.GetString(accountSidKey),
 		AuthToken:  c.viper.GetString(authTokenKey),
 		NumberTo:   c.viper.GetString(numberToKey),

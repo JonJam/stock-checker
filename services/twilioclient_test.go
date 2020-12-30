@@ -22,7 +22,7 @@ func TestSend_SendsExpectedRequest(t *testing.T) {
 	defer ts.Close()
 
 	twilioConfig := config.TwilioConfig{
-		Url:        ts.URL,
+		URL:        ts.URL,
 		AccountSid: "SID",
 		AuthToken:  "AUTH_TOKEN",
 		NumberFrom: "NUMBER_FROM",
