@@ -81,12 +81,14 @@ func (c AppConfig) GetSchedulerConfig() SchedulerConfig {
 }
 
 func (c AppConfig) GetTwilioConfig() TwilioConfig {
+	const urlKey = "TWILIO_URL"
 	const accountSidKey = "TWILIO_ACCOUNTSID"
 	const authTokenKey = "TWILIO_AUTHTOKEN"
 	const numberToKey = "TWILIO_NUMBERTO"
 	const numberFromKey = "TWILIO_NUMBERFROM"
 
 	keys := []string{
+		urlKey,
 		accountSidKey,
 		authTokenKey,
 		numberToKey,
@@ -96,6 +98,7 @@ func (c AppConfig) GetTwilioConfig() TwilioConfig {
 	c.checkKeysExist(keys)
 
 	return TwilioConfig{
+		Url:        c.viper.GetString(urlKey),
 		AccountSid: c.viper.GetString(accountSidKey),
 		AuthToken:  c.viper.GetString(authTokenKey),
 		NumberTo:   c.viper.GetString(numberToKey),

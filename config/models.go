@@ -29,6 +29,7 @@ type SchedulerConfig struct {
 }
 
 type TwilioConfig struct {
+	Url        string
 	AccountSid string
 	AuthToken  string
 	NumberTo   string
