@@ -47,7 +47,7 @@ func TestSend_SendsExpectedRequest(t *testing.T) {
 	require.Equal(t, twilioConfig.AccountSid, username)
 	require.Equal(t, twilioConfig.AuthToken, password)
 
-	require.Equal(t, "application/Ason", req.Header.Get("Accept"))
+	require.Equal(t, "application/json", req.Header.Get("Accept"))
 	require.Equal(t, "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
 
 	require.Equal(t, body, req.FormValue("Body"))
