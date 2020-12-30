@@ -50,12 +50,13 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
 
+    #  Following https://golangci-lint.run/usage/install#other-ci
     steps:
       - name: Install golangci-lint
         run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.33.0
 
       - name: Run linter
-        run: golangci-lint run
+        run: ./bin/golangci-lint -v run --output-format github-actions
 
       # - name: Run linter
       #   uses: golangci/golangci-lint-action@v2
