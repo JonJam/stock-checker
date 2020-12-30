@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestNotify_Disabled_DoesNotSendSms(t *testing.T) {
+func TestNotify_Disabled_DoesNotSendSMS(t *testing.T) {
 	// ARRANGE
 	l := zap.NewNop()
 
@@ -38,7 +38,7 @@ func TestNotify_Disabled_DoesNotSendSms(t *testing.T) {
 	client.AssertNotCalled(t, "Send")
 }
 
-func TestNotify_Enabled_SendsSms(t *testing.T) {
+func TestNotify_Enabled_SendsSMS(t *testing.T) {
 	// ARRANGE
 	l := zap.NewNop()
 
