@@ -34,13 +34,13 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./... && go test -v ./... -json > test-report.out
+      run: go test -v ./... -coverprofile=test-output/coverage-report.out && go test -v ./... -json > test-output/test-report.out
 
-    - name: Upload test report
+    - name: Upload test reports
       uses: actions/upload-artifact@v2
       with:
-        name: test-report
-        path: test-report.out
+        name: test-output
+        path: test-output
 
   lint:
     name: Lint
@@ -66,10 +66,10 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
       
-      - name: Download test report
+      - name: Download test reports
         uses: actions/download-artifact@v2
         with:
-          name: test-report
+          name: test-output
 
       - name: Run SonarCloud scan
         uses: sonarsource/sonarcloud-github-action@master
