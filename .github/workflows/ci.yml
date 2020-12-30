@@ -59,15 +59,18 @@ jobs:
         run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.33.0
 
       - name: Run linter
-        run: ./bin/golangci-lint -v run --out-format=github-actions
-
-      # - name: Run linter
-      #   uses: golangci/golangci-lint-action@v2
-      #   with:
-      #     version: v1.33
+        run: |
+          ./bin/golangci-lint -v run --out-format=github-actions
+          ./bin/golangci-lint -v run --out-format=checkstyle > lint-report.out
+      
+      - name: Upload lint report
+        uses: actions/upload-artifact@v2
+        with:
+          name: lint-report
+          path: lint-report
 
   sonar:
-    needs: build
+    needs: [build, lint]
     name: Sonar
     runs-on: ubuntu-latest
 
@@ -82,6 +85,12 @@ jobs:
         with:
           name: test-output
           path: test-output
+
+      - name: Download lint report
+        uses: actions/download-artifact@v2
+        with:
+          name: lint-report
+          path: lint-report
 
       - name: Run SonarCloud scan
         uses: sonarsource/sonarcloud-github-action@master
