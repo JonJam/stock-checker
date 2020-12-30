@@ -11,7 +11,7 @@ workers:
   instance_count: 1
   instance_size_slug: basic-xs
   envs:
-  - key: SC_TWILIO_ENABLED
+  - key: SC_NOTIFIER_ENABLED
     scope: RUN_AND_BUILD_TIME
     value: "true"
   - key: SC_TWILIO_ACCOUNTSID

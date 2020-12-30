@@ -8,81 +8,105 @@ import (
 	"github.com/spf13/viper"
 )
 
-func init() {
+type AppConfig struct {
+	viper *viper.Viper
+}
+
+func NewAppConfig() AppConfig {
+	v := viper.GetViper()
+
 	// Setup
-	viper.SetConfigName("config")
-	viper.SetConfigType("env")
+	v.SetConfigName("config")
+	v.SetConfigType("env")
 
 	// Configure directories to look for config
-	viper.AddConfigPath(".")
+	v.AddConfigPath(".")
 
 	// Configure environment variables
-	viper.SetEnvPrefix("sc")
-	viper.AutomaticEnv()
+	v.SetEnvPrefix("sc")
+	v.AutomaticEnv()
 
 	// Load configuration file
-	err := viper.ReadInConfig()
+	err := v.ReadInConfig()
 
 	if err != nil {
 		log.Fatalf("Could not read config file: %s.\n", err)
 	}
+
+	return AppConfig{
+		viper: v,
+	}
 }
 
-func GetLogConfig() LogConfig {
+func (c AppConfig) GetLogConfig() LogConfig {
 	const developmentKey = "LOG_DEVELOPMENT"
 
 	keys := []string{
 		developmentKey,
 	}
 
-	checkKeysExist(keys)
+	c.checkKeysExist(keys)
 
 	return LogConfig{
-		Development: viper.GetBool(developmentKey),
+		Development: c.viper.GetBool(developmentKey),
 	}
 }
 
-func GetSchedulerConfig() SchedulerConfig {
+func (c AppConfig) GetNotifierConfig() NotifierConfig {
+	const enabledKey = "NOTIFIER_ENABLED"
+
+	keys := []string{
+		enabledKey,
+	}
+
+	c.checkKeysExist(keys)
+
+	return NotifierConfig{
+		Enabled: c.viper.GetBool(enabledKey),
+	}
+}
+
+func (c AppConfig) GetSchedulerConfig() SchedulerConfig {
 	const intervalKey = "SCHEDULER_INTERVAL"
 
 	keys := []string{
 		intervalKey,
 	}
 
-	checkKeysExist(keys)
+	c.checkKeysExist(keys)
 
 	return SchedulerConfig{
-		Interval: viper.GetUint64(intervalKey),
+		Interval: c.viper.GetUint64(intervalKey),
 	}
 }
 
-func GetTwilioConfig() TwilioConfig {
-	const enabledKey = "TWILIO_ENABLED"
+func (c AppConfig) GetTwilioConfig() TwilioConfig {
+	const urlKey = "TWILIO_URL"
 	const accountSidKey = "TWILIO_ACCOUNTSID"
 	const authTokenKey = "TWILIO_AUTHTOKEN"
 	const numberToKey = "TWILIO_NUMBERTO"
 	const numberFromKey = "TWILIO_NUMBERFROM"
 
 	keys := []string{
-		enabledKey,
+		urlKey,
 		accountSidKey,
 		authTokenKey,
 		numberToKey,
 		numberFromKey,
 	}
 
-	checkKeysExist(keys)
+	c.checkKeysExist(keys)
 
 	return TwilioConfig{
-		Enabled:    viper.GetBool(enabledKey),
-		AccountSid: viper.GetString(accountSidKey),
-		AuthToken:  viper.GetString(authTokenKey),
-		NumberTo:   viper.GetString(numberToKey),
-		NumberFrom: viper.GetString(numberFromKey),
+		URL:        c.viper.GetString(urlKey),
+		AccountSid: c.viper.GetString(accountSidKey),
+		AuthToken:  c.viper.GetString(authTokenKey),
+		NumberTo:   c.viper.GetString(numberToKey),
+		NumberFrom: c.viper.GetString(numberFromKey),
 	}
 }
 
-func GetRodConfig() RodConfig {
+func (c AppConfig) GetRodConfig() RodConfig {
 	const devToolsKey = "ROD_DEVTOOLS"
 	const headlessKey = "ROD_HEADLESS"
 	const pagePoolSizeKey = "ROD_PAGEPOOLSIZE"
@@ -97,20 +121,20 @@ func GetRodConfig() RodConfig {
 		traceKey,
 	}
 
-	checkKeysExist(keys)
+	c.checkKeysExist(keys)
 
 	return RodConfig{
-		DevTools:     viper.GetBool(devToolsKey),
-		Headless:     viper.GetBool(headlessKey),
-		PagePoolSize: viper.GetInt(pagePoolSizeKey),
-		SlowMotion:   viper.GetBool(slowMotionKey),
-		Trace:        viper.GetBool(traceKey),
+		DevTools:     c.viper.GetBool(devToolsKey),
+		Headless:     c.viper.GetBool(headlessKey),
+		PagePoolSize: c.viper.GetInt(pagePoolSizeKey),
+		SlowMotion:   c.viper.GetBool(slowMotionKey),
+		Trace:        c.viper.GetBool(traceKey),
 	}
 }
 
-func checkKeysExist(keys []string) {
+func (c AppConfig) checkKeysExist(keys []string) {
 	for _, k := range keys {
-		if !viper.IsSet(k) {
+		if !c.viper.IsSet(k) {
 			log.Fatalf("Configuration key %s not set.\n", k)
 		}
 	}

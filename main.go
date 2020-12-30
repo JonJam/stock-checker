@@ -14,10 +14,12 @@ import (
 )
 
 func main() {
+	c := config.NewAppConfig()
+
 	var logger *zap.Logger
 	var err error
 
-	if config.GetLogConfig().Development {
+	if c.GetLogConfig().Development {
 		logger, err = zap.NewDevelopment()
 	} else {
 		logger, err = zap.NewProduction()
@@ -25,22 +27,19 @@ func main() {
 
 	if err != nil {
 		log.Fatalf("Could not create logger: %s.\n", err)
-		return
 	}
 
 	defer func() {
-		err := logger.Sync()
-
-		if err != nil {
+		if err := logger.Sync(); err != nil {
 			logger.Error("Failed to flush logs.", zap.Error(err))
 		}
 	}()
 
 	s := gocron.NewScheduler(time.UTC)
 
-	i := config.GetSchedulerConfig().Interval
+	i := c.GetSchedulerConfig().Interval
 	_, err = s.Every(i).Hour().Do(func() {
-		checkStores(logger)
+		checkStores(c, logger)
 	})
 
 	if err != nil {
@@ -51,7 +50,7 @@ func main() {
 	s.StartBlocking()
 }
 
-func checkStores(logger *zap.Logger) {
+func checkStores(c config.Config, logger *zap.Logger) {
 	logger.Info("Starting task.")
 
 	s := []stores.Store{
@@ -66,8 +65,8 @@ func checkStores(logger *zap.Logger) {
 		stores.NewSmyths(logger),
 	}
 
-	c := services.NewStoresChecker(logger)
-	results := c.CheckStores(s)
+	storesChecker := services.NewStoresChecker(c, logger)
+	results := storesChecker.CheckStores(s)
 
 	hasStock := false
 
@@ -79,7 +78,9 @@ func checkStores(logger *zap.Logger) {
 	}
 
 	if hasStock {
-		n := services.NewNotifier(logger)
+		t := services.NewTwilioClient(c)
+		n := services.NewNotifier(c, logger, t)
+
 		n.Notify(results)
 	}
 

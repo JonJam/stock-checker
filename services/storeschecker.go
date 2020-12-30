@@ -14,11 +14,13 @@ import (
 )
 
 type StoresChecker struct {
+	config config.RodConfig
 	logger *zap.Logger
 }
 
-func NewStoresChecker(l *zap.Logger) StoresChecker {
+func NewStoresChecker(c config.Config, l *zap.Logger) StoresChecker {
 	return StoresChecker{
+		config: c.GetRodConfig(),
 		logger: l,
 	}
 }
@@ -48,7 +50,7 @@ func (s StoresChecker) CheckStores(storesSlice []stores.Store) []stores.StockChe
 		}
 	}()
 
-	pool := rod.NewPagePool(config.GetRodConfig().PagePoolSize)
+	pool := rod.NewPagePool(s.config.PagePoolSize)
 	defer pool.Cleanup(func(p *rod.Page) {
 		err := p.Close()
 
@@ -81,8 +83,8 @@ func (s StoresChecker) CheckStores(storesSlice []stores.Store) []stores.StockChe
 func (s StoresChecker) createControlURL() (string, error) {
 	launcher := launcher.New().Set("--no-sandbox")
 
-	launcher.Devtools(config.GetRodConfig().DevTools)
-	launcher.Headless(config.GetRodConfig().Headless)
+	launcher.Devtools(s.config.DevTools)
+	launcher.Headless(s.config.Headless)
 
 	return launcher.Launch()
 }
@@ -92,9 +94,9 @@ func (s StoresChecker) createBrowser(url string) (*rod.Browser, error) {
 
 	browser.Logger(newCustomRodLogger(s.logger))
 
-	browser.Trace(config.GetRodConfig().Trace)
+	browser.Trace(s.config.Trace)
 
-	if config.GetRodConfig().SlowMotion {
+	if s.config.SlowMotion {
 		browser.SlowMotion(time.Second)
 	}
 
