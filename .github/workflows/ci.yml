@@ -67,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: lint-report
-          path: lint-report
+          path: lint-report.out
 
   sonar:
     needs: [build, lint]
@@ -90,7 +90,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: lint-report
-          path: lint-report
 
       - name: Run SonarCloud scan
         uses: sonarsource/sonarcloud-github-action@master
