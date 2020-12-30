@@ -36,8 +36,8 @@ jobs:
     - name: Test
       run: |
         mkdir test-output
-        go test -v ./... -coverprofile=test-output/coverage-report.out
-        go test -v ./... -json > test-output/test-report.out
+        go test -v $(go list ./... | grep -v mocks) -coverprofile=test-output/coverage-report.out
+        go test -v $(go list ./... | grep -v mocks) -json > test-output/test-report.out
 
     - name: Upload test reports
       uses: actions/upload-artifact@v2
